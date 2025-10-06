@@ -396,7 +396,7 @@ if page == "Instructions How-to-use":
     st.markdown("---")
 
     st.subheader("▶️ Tutorial Video")
-    st.video("https://www.youtube.com/watch?v=VYOjWnS4cMY")  # replace with your link
+    st.video("")  # replace with your link
 
     st.subheader("📘 Step-by-Step Instructions")
     st.markdown("""
@@ -512,7 +512,7 @@ elif page == "Proposed Tool":
             copy_from_section("BAU 2", "Proposed Tool")
 
     render_activity_section("Proposed Tool")
-    
+
 # =========================================================
 #  OTHER ACTIVITIES PAGES
 # =========================================================
