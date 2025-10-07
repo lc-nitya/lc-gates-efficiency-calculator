@@ -396,7 +396,7 @@ if page == "Instructions How-to-use":
     st.markdown("---")
 
     st.subheader("▶️ Tutorial Video")
-    st.video("")  # replace with your link
+    st.video("https://www.youtube.com/watch?v=_4kHxtiuML0")  # replace with your link
 
     st.subheader("📘 Step-by-Step Instructions")
     st.markdown("""
@@ -831,13 +831,6 @@ elif page == "Infrastructure Costs":
     })
     st.dataframe(summary_df, use_container_width=True)
 
-    # --- Notes ---
-    st.info(
-        "The cost estimate reflects the **total cost incurred per study**, i.e., for the end-users who are:\n"
-        "- researchers and organizations that integrate the proposed tool or build their own (as in BAUs), and\n"
-        "- the platform that maintains the proposed tool."
-    )
-
     # --- CSV download for itemized table ---
     csv_infra = df_infra.to_csv(index=False).encode("utf-8")
     st.download_button(
@@ -859,9 +852,6 @@ elif page == "Outputs Tables and Graphs":
     st.header("Outputs (Tables and Graphs)")
     st.success("✅ You’ve reached the final section!")
     st.write("Results, charts, and performance indicators will appear here.")
-    if st.button("🔁 Restart (Go to First Page)"):
-        go_first()
-        st.rerun()
 
 # =========================================================
 #  FIXED NAVIGATION BUTTONS
