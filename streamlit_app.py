@@ -282,7 +282,7 @@ def render_activity_section(section_name):
                     height=80
                 )
                 notes = cols1[1].text_area(
-                    "Notes",
+                    "Notes (Explain how time/labor is affected by BAU 1/ BAU 2/Proposed Tool)",
                     value=row.get("Notes", ""),
                     key=f"{section_name}_{stage}_notes_{row['id']}",
                     height=80
@@ -317,7 +317,7 @@ def render_activity_section(section_name):
                 row["Roles"] = time_data
 
                 # Delete Step
-                if st.button("🗑️ Delete Step", key=f"del_{section_name}_{stage}_{row['id']}"):
+                if st.button("❌ Delete Step", key=f"del_{section_name}_{stage}_{row['id']}"):
                     st.session_state.project_steps[section_name][stage] = [
                         r for r in rows if r["id"] != row["id"]
                     ]
@@ -351,7 +351,7 @@ def render_activity_section(section_name):
 
     # --- Final consolidated preview table ---
     if all_preview_data:
-        st.markdown("### Project Activities Preview")
+        st.markdown(f"### {section_name} Activities")
         df = pd.DataFrame(all_preview_data)
         st.dataframe(df, use_container_width=True)
         # --- Save the final table in session state for computations ---
@@ -437,7 +437,7 @@ elif page == "Personnel Salaries":
         row.setdefault("Notes", "")
 
         st.markdown(f"**Role #{idx+1}**")
-        cols = st.columns([3, 2, 4, 0.5])  # Narrow column for trash icon
+        cols = st.columns([3, 2, 4, 1])  # Narrow column for trash icon
 
         # Editable inputs
         role = cols[0].text_input("Role", row["Role"], key=f"role_{row['id']}")
@@ -448,7 +448,7 @@ elif page == "Personnel Salaries":
         notes = cols[2].text_input("Notes", row["Notes"], key=f"notes_{row['id']}")
 
         # Delete button
-        if cols[3].button("🗑️", key=f"del_{row['id']}"):
+        if cols[3].button("❌", key=f"del_{row['id']}"):
             st.session_state.personnel_rows = [r for r in rows if r["id"] != row["id"]]
             st.rerun()
 
@@ -464,7 +464,9 @@ elif page == "Personnel Salaries":
 
     # Display summary
     st.write("### Current Personnel Table")
-    st.table(pd.DataFrame(st.session_state.personnel_rows).drop(columns="id"))
+    personnel_salaries_df = pd.DataFrame(st.session_state.personnel_rows).drop(columns="id")
+    st.dataframe(personnel_salaries_df, use_container_width=True)
+    st.session_state[f"df_personnel_salaries"] = personnel_salaries_df
 
     # CSV Download
     if len(st.session_state.personnel_rows) > 0:
@@ -480,13 +482,12 @@ elif page == "Personnel Salaries":
 # =========================================================
 #  PROJECT ACTIVITIES PAGE
 # =========================================================
-if page == "BAU 1":
+elif page == "BAU 1":
     st.markdown("---")
     st.header("📊 BAU 1: Project Activities")
     st.markdown("---")
 
     render_activity_section("BAU 1")
-
 
 elif page == "BAU 2":
     st.markdown("---")
@@ -503,31 +504,357 @@ elif page == "Proposed Tool":
     st.header("📊 Proposed Tool: Project Activities")
     st.markdown("---")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("📋 Copy all values from BAU 1"):
-            copy_from_section("BAU 1", "Proposed Tool")
-    with col2:
-        if st.button("📋 Copy all values from BAU 2"):
-            copy_from_section("BAU 2", "Proposed Tool")
+    if st.button("📋 Copy all values from BAU 1"):
+        copy_from_section("BAU 1", "Proposed Tool")
+
+    if st.button("📋 Copy all values from BAU 2"):
+        copy_from_section("BAU 2", "Proposed Tool")
 
     render_activity_section("Proposed Tool")
 
 # =========================================================
-#  OTHER ACTIVITIES PAGES
+#  ROI PARAMETERS PAGE
 # =========================================================
-elif page == "Infrastructure Costs":
-    st.header("Infrastructure Costs")
-    st.write("Input infrastructure or capital expenditure details here.")
-
 elif page == "ROI Parameters":
-    st.header("ROI Parameters")
-    st.write("Set financial or performance parameters for ROI calculation.")
+    st.markdown("---")
+    st.header("📈 ROI Parameters")
+    st.markdown("---")
+
+    # --- Median Impact on Learning Outcomes ---
+    st.subheader("Estimated Impact of Research Project")
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        learning_definition = st.text_input(
+            "Definition of median impact on learning outcomes (in SD terms)",
+            placeholder="e.g., Median impact on standardized math scores (in SD)"
+        )
+    with col2:
+        learning_sd = st.number_input(
+            "Median impact (SD)",
+            min_value=0.0,
+            placeholder=0.12,
+            step=0.01,
+            format="%.2f",
+            key="roi_learning_sd"
+        )
+
+    # --- Economic Opportunity Coefficient ---
+    econ_definition = st.text_input(
+        "Definition of average increase in long-term economic opportunity per 1 SD improvement (in $ terms)",
+        placeholder="e.g. avg. increase in income at 30 for 1 SD improvement in math scores in middle school"
+    )
+    econ_per_sd = st.number_input(
+        "Average Economic increase per 1 SD (in $)",
+        min_value=0.0,
+        placeholder=2400,
+        step=0.01,
+        format="%.2f",
+        key="roi_econ_per_sd"
+    )
+
+    # --- Per-Student Outcome Improvement (Computed) ---
+    computed_improvement = learning_sd * econ_per_sd
+    st.number_input("Per-student improvement in long-term economic opportunity (in $)", value=computed_improvement,
+                    disabled=True)
+
+    # --- Evidence Generation ---
+    st.subheader("Evidence / Discovery Rate")
+    evidence_rate = st.number_input(
+        "Rate of discovery of impact",
+        min_value=0.0,
+        step=0.01,
+        format="%.2f",
+        key="roi_evidence_rate"
+    )
+
+    # --- Reach & Investment ---
+    st.subheader("Reach & Investment")
+    total_students = st.number_input(
+        "Total number of students served by platform / tool",
+        min_value=1,
+        step=1,
+        key="roi_total_students"
+    )
+    total_investment = st.number_input(
+        "Total investment by grant organization in the tool (in $)",
+        min_value=0,
+        step=1000,
+        format="%d",
+        key="roi_total_investment_k"
+    )
+
+    # --- Organizations Served ---
+    st.subheader("Organizations Served")
+    orgs_proposed = st.number_input(
+        "Number of organizations served by proposed tool",
+        min_value=1,
+        step=1,
+        key="roi_orgs_proposed"
+    )
+    orgs_bau1 = st.number_input(
+        "Number of organizations served under BAU scenario 1",
+        min_value=1,
+        step=1,
+        key="roi_orgs_bau1"
+    )
+    orgs_bau2 = st.number_input(
+        "Number of organizations served under BAU scenario 2",
+        min_value=1,
+        step=1,
+        key="roi_orgs_bau2"
+    )
+
+    # --- Save all ROI parameters in session_state for later use ---
+    st.session_state.roi_parameters = {
+        "learning_definition": learning_definition,
+        "learning_sd": learning_sd,
+        "econ_definition": econ_definition,
+        "econ_per_sd": econ_per_sd,
+        "computed_improvement": computed_improvement,
+        "evidence_rate": evidence_rate,
+        "total_students": total_students,
+        "total_investment_k": total_investment,
+        "orgs_proposed": orgs_proposed,
+        "orgs_bau1": orgs_bau1,
+        "orgs_bau2": orgs_bau2
+    }
+
+    st.markdown("✅ ROI parameters (including computed improvement) saved.")
+
+# =========================================================
+#  ASSUMPTIONS PAGES
+# =========================================================
 
 elif page == "Assumptions":
-    st.header("Assumptions")
-    st.write("List all key model assumptions here.")
+    st.markdown("---")
+    st.header("🧩 Assumptions")
+    st.markdown("---")
 
+    st.caption("List any assumptions made during your analysis below. "
+               "You can add multiple entries, edit or delete them, and download the full list as a CSV file. This list is for your reference only, it is not used in any calculations.")
+
+    # Initialize session state
+    if "assumptions" not in st.session_state:
+        st.session_state.assumptions = [
+            {"id": str(uuid.uuid4()), "Assumption": "e.g., A/B testing on the platform runs for 4 weeks."}
+        ]
+
+    # Display and edit assumptions
+    rows = st.session_state.assumptions
+    for idx, row in enumerate(rows):
+        cols = st.columns([8, 1])
+        assumption_text = cols[0].text_input(
+            f"Assumption #{idx + 1}",
+            value=row["Assumption"],
+            key=f"assumption_{row['id']}"
+        )
+        row["Assumption"] = assumption_text
+
+        # Delete button
+        if cols[1].button("❌", key=f"del_assumption_{row['id']}"):
+            st.session_state.assumptions = [r for r in rows if r["id"] != row["id"]]
+            st.rerun()
+
+    # Add new assumption
+    if st.button("➕ Add New Assumption"):
+        st.session_state.assumptions.append({
+            "id": str(uuid.uuid4()),
+            "Assumption": ""
+        })
+        st.rerun()
+
+    # Display table
+    st.markdown("### Current List of Assumptions")
+    df_assumptions = pd.DataFrame(st.session_state.assumptions).drop(columns="id")
+    st.dataframe(df_assumptions, use_container_width=True)
+
+    # CSV download
+    csv = df_assumptions.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="📥 Download Assumptions as CSV",
+        data=csv,
+        file_name="assumptions.csv",
+        mime="text/csv"
+    )
+# =========================================================
+#  INFRASTRUCTURE PAGE
+# =========================================================
+elif page == "Infrastructure Costs":
+    st.markdown("---")
+    st.header("🏗️ Infrastructure Costs")
+    st.markdown("---")
+
+    st.caption(
+        "Enter annual infrastructure or operational costs for each scenario below. "
+        "You can adjust cost amounts, add notes, and compute per-study costs automatically."
+    )
+
+    # --- Notes ---
+    st.info(
+        "The cost estimate reflects the **total cost incurred per study**, i.e., for the end-users who are:\n"
+        "- researchers and organizations that integrate the proposed tool or build their own (as in BAUs), and\n"
+        "- the platform that maintains the proposed tool."
+    )
+
+    # --- Initialize with prefilled categories but no costs ---
+    if "infrastructure_costs" not in st.session_state:
+        st.session_state.infrastructure_costs = [
+            {
+                "id": str(uuid.uuid4()),
+                "Cost Category (annual costs)": "Integration Costs",
+                "BAU 1": 0.0,
+                "BAU 2": 0.0,
+                "Proposed Tool": 0.0,
+                "Notes / Assumptions": ""
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "Cost Category (annual costs)": "Software Licenses",
+                "BAU 1": 0.0,
+                "BAU 2": 0.0,
+                "Proposed Tool": 0.0,
+                "Notes / Assumptions": ""
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "Cost Category (annual costs)": "Compute Resources",
+                "BAU 1": 0.0,
+                "BAU 2": 0.0,
+                "Proposed Tool": 0.0,
+                "Notes / Assumptions": ""
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "Cost Category (annual costs)": "Storage",
+                "BAU 1": 0.0,
+                "BAU 2": 0.0,
+                "Proposed Tool": 0.0,
+                "Notes / Assumptions": ""
+            }
+        ]
+
+    # --- Editable Cost Inputs ---
+    rows = st.session_state.infrastructure_costs
+    for idx, row in enumerate(rows):
+        st.markdown(f"Cost Item #{idx + 1}")
+        cols = st.columns([3, 1, 1, 1, 3, 1])
+
+        category = cols[0].text_input(
+            "Cost Category (annual costs)",
+            value=row["Cost Category (annual costs)"],
+            key=f"cat_{row['id']}"
+        )
+        bau1 = cols[1].number_input(
+            "BAU 1",
+            min_value=0.0,
+            step=10.0,
+            value=float(row["BAU 1"]),
+            key=f"bau1_{row['id']}"
+        )
+        bau2 = cols[2].number_input(
+            "BAU 2",
+            min_value=0.0,
+            step=10.0,
+            value=float(row["BAU 2"]),
+            key=f"bau2_{row['id']}"
+        )
+        proposed = cols[3].number_input(
+            "Prop. Tool",
+            min_value=0.0,
+            step=10.0,
+            value=float(row["Proposed Tool"]),
+            key=f"tool_{row['id']}"
+        )
+        notes = cols[4].text_input(
+            "Notes / Assumptions",
+            value=row["Notes / Assumptions"],
+            key=f"notes_{row['id']}"
+        )
+
+        if cols[5].button("❌", key=f"del_cost_{row['id']}"):
+            st.session_state.infrastructure_costs = [r for r in rows if r["id"] != row["id"]]
+            st.rerun()
+
+        # Update stored row
+        row.update({
+            "Cost Category (annual costs)": category,
+            "BAU 1": bau1,
+            "BAU 2": bau2,
+            "Proposed Tool": proposed,
+            "Notes / Assumptions": notes
+        })
+
+    # --- Add new row button ---
+    if st.button("➕ Add Additional Cost Category"):
+        st.session_state.infrastructure_costs.append({
+            "id": str(uuid.uuid4()),
+            "Cost Category (annual costs)": "",
+            "BAU 1": 0.0,
+            "BAU 2": 0.0,
+            "Proposed Tool": 0.0,
+            "Notes / Assumptions": ""
+        })
+        st.rerun()
+
+    # --- Convert to DataFrame ---
+    df_infra = pd.DataFrame(st.session_state.infrastructure_costs).drop(columns="id")
+
+
+    # --- Studies conducted per year ---
+    studies_per_year = st.number_input(
+        "📚 Studies Conducted per Year",
+        min_value=1.0,
+        step=1.0,
+        value=10.0,
+        format="%.0f"
+    )
+
+    # --- Compute totals ---
+    total_bau1 = df_infra["BAU 1"].sum()
+    total_bau2 = df_infra["BAU 2"].sum()
+    total_tool = df_infra["Proposed Tool"].sum()
+
+    per_study_bau1 = total_bau1 / studies_per_year
+    per_study_bau2 = total_bau2 / studies_per_year
+    per_study_tool = total_tool / studies_per_year
+
+    # --- Itemized Preview Table ---
+    st.markdown("### 🧾 Itemized Infrastructure Costs")
+    st.dataframe(df_infra, use_container_width=True)
+
+    # --- Summary Preview Table ---
+    st.markdown("### 💰 Summary of Total & Per-Study Costs")
+    summary_df = pd.DataFrame({
+        "Scenario": ["BAU 1", "BAU 2", "Proposed Tool"],
+        "Total Annual Cost ($ thousands)": [total_bau1, total_bau2, total_tool],
+        "Per-Study Cost ($ thousands per study)": [per_study_bau1, per_study_bau2, per_study_tool]
+    })
+    st.dataframe(summary_df, use_container_width=True)
+
+    # --- Notes ---
+    st.info(
+        "The cost estimate reflects the **total cost incurred per study**, i.e., for the end-users who are:\n"
+        "- researchers and organizations that integrate the proposed tool or build their own (as in BAUs), and\n"
+        "- the platform that maintains the proposed tool."
+    )
+
+    # --- CSV download for itemized table ---
+    csv_infra = df_infra.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="📥 Download Itemized Infrastructure Costs as CSV",
+        data=csv_infra,
+        file_name="infrastructure_costs_itemized.csv",
+        mime="text/csv"
+    )
+
+    # --- Store DataFrames for later use ---
+    st.session_state.df_infrastructure_costs = df_infra
+    st.session_state.df_infrastructure_summary = summary_df
+
+
+# =========================================================
+#  OUTPUT PAGE
+# =========================================================
 elif page == "Outputs Tables and Graphs":
     st.header("Outputs (Tables and Graphs)")
     st.success("✅ You’ve reached the final section!")
