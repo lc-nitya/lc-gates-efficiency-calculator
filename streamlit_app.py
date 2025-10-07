@@ -19,7 +19,10 @@ PAGE_GROUPS = {
         "Assumptions": [],
         "Project Activities": ["BAU 1", "BAU 2", "Proposed Tool"],
     },
-    "Outputs Tables and Graphs": []
+    "Outputs": {
+        "Project-Stage Efficiency Gains": [],
+        "Personnel Efficiency Gains": []
+    }
 }
 
 # Flatten pages for sequential navigation
@@ -32,7 +35,8 @@ PAGES = [
     "BAU 1",
     "BAU 2",
     "Proposed Tool",
-    "Outputs Tables and Graphs"
+    "Project-Stage Efficiency Gains",
+    "Personnel Efficiency Gains"
 ]
 
 # --- Initialize session state ---
@@ -59,8 +63,9 @@ for page_name, subpages in PAGE_GROUPS["Inputs"].items():
             st.session_state.current_page = page_name
 
 st.sidebar.markdown("### 📊 Outputs")
-if st.sidebar.button("📈 Outputs (Tables and Graphs)", use_container_width=True):
-    st.session_state.current_page = "Outputs Tables and Graphs"
+for page_name, subpages in PAGE_GROUPS["Outputs"].items():
+    if st.sidebar.button(f"{page_name}", use_container_width=True):
+        st.session_state.current_page = page_name
 
 # --- Helper functions ---
 def go_next():
@@ -282,7 +287,7 @@ def render_activity_section(section_name):
                     height=80
                 )
                 notes = cols1[1].text_area(
-                    "Notes (Explain how time/labor is affected by BAU 1/ BAU 2/Proposed Tool)",
+                    "Notes (e.g., Explain how time/labor changes wrt BAU1/BAU2)",
                     value=row.get("Notes", ""),
                     key=f"{section_name}_{stage}_notes_{row['id']}",
                     height=80
@@ -624,7 +629,6 @@ elif page == "ROI Parameters":
 # =========================================================
 #  ASSUMPTIONS PAGES
 # =========================================================
-
 elif page == "Assumptions":
     st.markdown("---")
     st.header("🧩 Assumptions")
@@ -676,6 +680,7 @@ elif page == "Assumptions":
         file_name="assumptions.csv",
         mime="text/csv"
     )
+
 # =========================================================
 #  INFRASTRUCTURE PAGE
 # =========================================================
@@ -805,7 +810,7 @@ elif page == "Infrastructure Costs":
         "📚 Studies Conducted per Year",
         min_value=1.0,
         step=1.0,
-        value=10.0,
+        value=1.0,
         format="%.0f"
     )
 
@@ -826,8 +831,8 @@ elif page == "Infrastructure Costs":
     st.markdown("### 💰 Summary of Total & Per-Study Costs")
     summary_df = pd.DataFrame({
         "Scenario": ["BAU 1", "BAU 2", "Proposed Tool"],
-        "Total Annual Cost ($ thousands)": [total_bau1, total_bau2, total_tool],
-        "Per-Study Cost ($ thousands per study)": [per_study_bau1, per_study_bau2, per_study_tool]
+        "Total Annual Cost": [total_bau1, total_bau2, total_tool],
+        "Per-Study Cost": [per_study_bau1, per_study_bau2, per_study_tool]
     })
     st.dataframe(summary_df, use_container_width=True)
 
@@ -844,14 +849,248 @@ elif page == "Infrastructure Costs":
     st.session_state.df_infrastructure_costs = df_infra
     st.session_state.df_infrastructure_summary = summary_df
 
-
 # =========================================================
 #  OUTPUT PAGE
 # =========================================================
-elif page == "Outputs Tables and Graphs":
-    st.header("Outputs (Tables and Graphs)")
-    st.success("✅ You’ve reached the final section!")
-    st.write("Results, charts, and performance indicators will appear here.")
+elif page == "Project-Stage Efficiency Gains":
+    st.header("📊 Project-Stage Efficiency Gains")
+
+    # --- --- Helper function to compute total person-hours per stage ---
+    def compute_total_time(df):
+        """Compute total person-weeks per stage and convert to hours."""
+        if df is None or df.empty:
+            return pd.DataFrame(columns=["Stage", "Person-Weeks"])
+        df = df.copy()
+        df["Total Duration (weeks)"] = pd.to_numeric(df.get("Total Duration (weeks)", 0), errors="coerce").fillna(0)
+        df["Active Time Spent (%)"] = pd.to_numeric(df.get("Active Time Spent (%)", 0), errors="coerce").fillna(0)
+        if "Stage" not in df.columns:
+            df["Stage"] = "Unknown Stage"
+        df["Person-Weeks"] = df["Total Duration (weeks)"] * df["Active Time Spent (%)"] / 100
+        df_hours = df.groupby("Stage", as_index=False)["Person-Weeks"].sum()
+        df_hours["Person-Hours"] = df_hours["Person-Weeks"] * 40
+        return df_hours[["Stage", "Person-Hours"]]
+
+    # --- Retrieve DataFrames ---
+    df_bau1 = st.session_state.get("df_BAU_1", pd.DataFrame())
+    df_bau2 = st.session_state.get("df_BAU_2", pd.DataFrame())
+    df_tool = st.session_state.get("df_Proposed_Tool", pd.DataFrame())
+    personnel_rows = st.session_state.get("personnel_rows", [])
+
+    # --- Time Table ---
+    df_time_bau1 = compute_total_time(df_bau1)
+    df_time_bau2 = compute_total_time(df_bau2)
+    df_time_tool = compute_total_time(df_tool)
+
+    # Merge by Stage
+    time_summary = pd.DataFrame({"Stage": project_stages})
+    time_summary = time_summary.merge(df_time_bau1, on="Stage", how="left").rename(columns={"Person-Hours": "BAU 1 (hrs)"}).fillna(0)
+    time_summary = time_summary.merge(df_time_bau2, on="Stage", how="left").rename(columns={"Person-Hours": "BAU 2 (hrs)"}).fillna(0)
+    time_summary = time_summary.merge(df_time_tool, on="Stage", how="left").rename(columns={"Person-Hours": "Proposed Tool (hrs)"}).fillna(0)
+
+    # Compute time saved
+    time_summary["Time Saved vs BAU1 (hrs)"] = time_summary["BAU 1 (hrs)"] - time_summary["Proposed Tool (hrs)"]
+    time_summary["Time Saved vs BAU2 (hrs)"] = time_summary["BAU 2 (hrs)"] - time_summary["Proposed Tool (hrs)"]
+
+    # Add totals row
+    total_time_row = pd.DataFrame([{
+        "Stage": "TOTAL",
+        "BAU 1 (hrs)": time_summary["BAU 1 (hrs)"].sum(),
+        "BAU 2 (hrs)": time_summary["BAU 2 (hrs)"].sum(),
+        "Proposed Tool (hrs)": time_summary["Proposed Tool (hrs)"].sum(),
+        "Time Saved vs BAU1 (hrs)": time_summary["Time Saved vs BAU1 (hrs)"].sum(),
+        "Time Saved vs BAU2 (hrs)": time_summary["Time Saved vs BAU2 (hrs)"].sum()
+    }])
+    time_summary = pd.concat([time_summary, total_time_row], ignore_index=True)
+
+    # --- Cost Table ---
+    cost_summary = pd.DataFrame({"Stage": project_stages})
+
+    for scenario in ["BAU_1", "BAU_2", "Proposed_Tool"]:
+        costs = []
+        df_scenario = st.session_state.get(f"df_{scenario}", pd.DataFrame())
+        for stage in project_stages:
+            stage_rows = df_scenario[df_scenario["Stage"] == stage] if not df_scenario.empty else pd.DataFrame()
+            stage_cost = 0
+            for idx, row in stage_rows.iterrows():
+                role = row.get("Role", "")
+                pct_active = row.get("Active Time Spent (%)", 0)
+                duration_weeks = row.get("Total Duration (weeks)", 0)
+                # Look up hourly rate for this role
+                hr_rate = next((p["Average Hourly Rate"] for p in personnel_rows if p["Role"] == role), 0)
+                stage_cost += duration_weeks * pct_active / 100 * 40 * hr_rate
+            costs.append(stage_cost)
+        cost_summary[f"{scenario.replace('_',' ')} Cost ($)"] = costs
+
+    # --- Add Infrastructure row ---
+    infra_costs = st.session_state.get("df_infrastructure_summary", pd.DataFrame())
+    if not infra_costs.empty:
+        infra_row = {
+            "Stage": "Infrastructure",
+            "BAU 1 Cost ($)": infra_costs.loc[infra_costs["Scenario"]=="BAU 1", "Per-Study Cost"].values[0],
+            "BAU 2 Cost ($)": infra_costs.loc[infra_costs["Scenario"]=="BAU 2", "Per-Study Cost"].values[0],
+            "Proposed Tool Cost ($)": infra_costs.loc[infra_costs["Scenario"]=="Proposed Tool", "Per-Study Cost"].values[0]
+        }
+        cost_summary = pd.concat([cost_summary, pd.DataFrame([infra_row])], ignore_index=True)
+
+    # --- Compute Cost Saved ---
+    cost_summary["Cost Saved vs BAU1 ($)"] = cost_summary["BAU 1 Cost ($)"] - cost_summary["Proposed Tool Cost ($)"]
+    cost_summary["Cost Saved vs BAU2 ($)"] = cost_summary["BAU 2 Cost ($)"] - cost_summary["Proposed Tool Cost ($)"]
+
+    # --- Add TOTAL row ---
+    total_row = pd.DataFrame([{
+        "Stage": "TOTAL",
+        "BAU 1 Cost ($)": cost_summary["BAU 1 Cost ($)"].sum(),
+        "BAU 2 Cost ($)": cost_summary["BAU 2 Cost ($)"].sum(),
+        "Proposed Tool Cost ($)": cost_summary["Proposed Tool Cost ($)"].sum(),
+        "Cost Saved vs BAU1 ($)": cost_summary["Cost Saved vs BAU1 ($)"].sum(),
+        "Cost Saved vs BAU2 ($)": cost_summary["Cost Saved vs BAU2 ($)"].sum()
+    }])
+    cost_summary = pd.concat([cost_summary, total_row], ignore_index=True)
+
+    # --- Total Time Spent per Project Stage (ignoring personnel allocation) ---
+    total_time_summary = pd.DataFrame({"Stage": project_stages})
+
+    for scenario in ["BAU_1", "BAU_2", "Proposed_Tool"]:
+        durations = []
+        df_scenario = st.session_state.get(f"df_{scenario}", pd.DataFrame())
+        for stage in project_stages:
+            stage_rows = df_scenario[df_scenario["Stage"] == stage] if not df_scenario.empty else pd.DataFrame()
+            # Take the max duration per stage, ignoring multiple personnel rows
+            stage_time = stage_rows["Total Duration (weeks)"].max() if not stage_rows.empty else 0
+            durations.append(stage_time)
+        total_time_summary[f"{scenario.replace('_',' ')} Duration (weeks)"] = durations
+
+    # Compute time saved (positive = time saved)
+    total_time_summary["Time Saved vs BAU1 (weeks)"] = total_time_summary["BAU 1 Duration (weeks)"] - total_time_summary["Proposed Tool Duration (weeks)"]
+    total_time_summary["Time Saved vs BAU2 (weeks)"] = total_time_summary["BAU 2 Duration (weeks)"] - total_time_summary["Proposed Tool Duration (weeks)"]
+
+    # Add TOTAL row
+    total_time_row = pd.DataFrame([{
+        "Stage": "TOTAL",
+        "BAU 1 Duration (weeks)": total_time_summary["BAU 1 Duration (weeks)"].sum(),
+        "BAU 2 Duration (weeks)": total_time_summary["BAU 2 Duration (weeks)"].sum(),
+        "Proposed Tool Duration (weeks)": total_time_summary["Proposed Tool Duration (weeks)"].sum(),
+        "Time Saved vs BAU1 (weeks)": total_time_summary["Time Saved vs BAU1 (weeks)"].sum(),
+        "Time Saved vs BAU2 (weeks)": total_time_summary["Time Saved vs BAU2 (weeks)"].sum()
+    }])
+    total_time_summary = pd.concat([total_time_summary, total_time_row], ignore_index=True)
+
+    # --- Display tables ---
+    st.info(""" 
+            ### Duration (in weeks) by Project Stage ### 
+            - This table presents the total duration per project stage (in weeks), ignoring personnel allocation and active time spent.
+            - The **TOTAL** row provides the overall project-level duration. 
+            """)
+    st.dataframe(total_time_summary, use_container_width=True)
+
+    st.info(""" 
+            ### Active Person-Hours by Project Stage ###
+            - This table presents the estimated total person-hours required for each stage of the research project across the **BAU 1, BAU 2,** and **Proposed Tool** scenarios. 
+            - **Time Saved** = hours saved by the Proposed Tool compared to each BAU scenario (positive = less time required). 
+            - All durations assume **40 working hours per week**. 
+            - The **TOTAL** row provides the overall project-level summary. 
+            """)
+
+    st.dataframe(time_summary, use_container_width=True)
+
+    st.info(""" 
+            ### Cost by Project Stage ###
+            - This table presents the estimated total personnel cost required for each stage of the research project as well as the non-personnel / infrastructure cost across the **BAU 1, BAU 2,** and **Proposed Tool** scenarios. 
+            - Personnel-cost is based on the % Active Time spent.
+            - **Cost Saved** = hours saved by the Proposed Tool compared to each BAU scenario (positive = less cost required). 
+            - **Infrastructure** represents the total hardware / software cost (i.e. non personnel cost for the entire project)
+            - The **TOTAL** row provides the overall project-level summary. 
+            """)
+    st.dataframe(cost_summary, use_container_width=True)
+
+elif page == "Personnel Efficiency Gains":
+    st.header("📊 Personnel Efficiency Gains")
+
+    # Retrieve DataFrames
+    df_bau1 = st.session_state.get("df_BAU_1", pd.DataFrame())
+    df_bau2 = st.session_state.get("df_BAU_2", pd.DataFrame())
+    df_tool = st.session_state.get("df_Proposed_Tool", pd.DataFrame())
+    personnel_rows = st.session_state.get("personnel_rows", [])
+
+    # Get unique roles
+    roles = sorted({row.get("Role", "Unknown Role") for df in [df_bau1, df_bau2, df_tool] for _, row in df.iterrows()})
+
+    # --- Person-Hours Table ---
+    time_summary = pd.DataFrame({"Role": roles})
+    for scenario_name, df_scenario in zip(["BAU 1", "BAU 2", "Proposed Tool"], [df_bau1, df_bau2, df_tool]):
+        hours_list = []
+        for role in roles:
+            role_rows = df_scenario[df_scenario["Role"] == role] if not df_scenario.empty else pd.DataFrame()
+            total_hours = sum(
+                row.get("Total Duration (weeks)", 0) * row.get("Active Time Spent (%)", 0) / 100 * 40
+                for _, row in role_rows.iterrows()
+            )
+            hours_list.append(total_hours)
+        time_summary[f"{scenario_name} (hrs)"] = hours_list
+
+    # Compute time saved
+    time_summary["Time Saved vs BAU1 (hrs)"] = time_summary["BAU 1 (hrs)"] - time_summary["Proposed Tool (hrs)"]
+    time_summary["Time Saved vs BAU2 (hrs)"] = time_summary["BAU 2 (hrs)"] - time_summary["Proposed Tool (hrs)"]
+
+    # Add TOTAL row
+    total_time_row = pd.DataFrame([{
+        "Role": "TOTAL",
+        "BAU 1 (hrs)": time_summary["BAU 1 (hrs)"].sum(),
+        "BAU 2 (hrs)": time_summary["BAU 2 (hrs)"].sum(),
+        "Proposed Tool (hrs)": time_summary["Proposed Tool (hrs)"].sum(),
+        "Time Saved vs BAU1 (hrs)": time_summary["Time Saved vs BAU1 (hrs)"].sum(),
+        "Time Saved vs BAU2 (hrs)": time_summary["Time Saved vs BAU2 (hrs)"].sum()
+    }])
+    time_summary = pd.concat([time_summary, total_time_row], ignore_index=True)
+
+    # --- Cost Table ---
+    cost_summary = pd.DataFrame({"Role": roles})
+    for scenario_name, df_scenario in zip(["BAU 1", "BAU 2", "Proposed Tool"], [df_bau1, df_bau2, df_tool]):
+        cost_list = []
+        for role in roles:
+            role_rows = df_scenario[df_scenario["Role"] == role] if not df_scenario.empty else pd.DataFrame()
+            total_cost = 0
+            for _, row in role_rows.iterrows():
+                pct_active = row.get("Active Time Spent (%)", 0)
+                duration_weeks = row.get("Total Duration (weeks)", 0)
+                hr_rate = next((p["Average Hourly Rate"] for p in personnel_rows if p["Role"] == role), 0)
+                total_cost += duration_weeks * pct_active / 100 * 40 * hr_rate
+            cost_list.append(total_cost)
+        cost_summary[f"{scenario_name} Cost ($)"] = cost_list
+
+    # Compute cost saved
+    cost_summary["Cost Saved vs BAU1 ($)"] = cost_summary["BAU 1 Cost ($)"] - cost_summary["Proposed Tool Cost ($)"]
+    cost_summary["Cost Saved vs BAU2 ($)"] = cost_summary["BAU 2 Cost ($)"] - cost_summary["Proposed Tool Cost ($)"]
+
+    # Add TOTAL row
+    total_cost_row = pd.DataFrame([{
+        "Role": "TOTAL",
+        "BAU 1 Cost ($)": cost_summary["BAU 1 Cost ($)"].sum(),
+        "BAU 2 Cost ($)": cost_summary["BAU 2 Cost ($)"].sum(),
+        "Proposed Tool Cost ($)": cost_summary["Proposed Tool Cost ($)"].sum(),
+        "Cost Saved vs BAU1 ($)": cost_summary["Cost Saved vs BAU1 ($)"].sum(),
+        "Cost Saved vs BAU2 ($)": cost_summary["Cost Saved vs BAU2 ($)"].sum()
+    }])
+    cost_summary = pd.concat([cost_summary, total_cost_row], ignore_index=True)
+
+    # --- Display ---
+    st.info("""
+        ### Active Person-Hours by Role
+        - Shows total active hours per role across **BAU 1, BAU 2,** and **Proposed Tool** scenarios.
+        - **Time Saved** = hours saved by Proposed Tool compared to each BAU scenario (positive = less time required).
+        - All durations assume 40 working hours per week.
+        - The **TOTAL** row provides the overall summary across all roles.
+        """)
+    st.dataframe(time_summary, use_container_width=True)
+
+    st.info("""
+        ### Personnel Cost by Role
+        - Shows total personnel cost per role across **BAU 1, BAU 2,** and **Proposed Tool** scenarios.
+        - Personnel-cost is based on the % Active Time spent.
+        - Cost Saved = hours saved by the Proposed Tool compared to each BAU scenario (positive = less cost required).
+        - The TOTAL row provides the overall project-level summary.
+    """)
+    st.dataframe(cost_summary, use_container_width=True)
 
 # =========================================================
 #  FIXED NAVIGATION BUTTONS
@@ -875,6 +1114,8 @@ with placeholder.container():
                 go_next()
                 st.rerun()
         elif current_idx == len(PAGES) - 1:
-            if st.button("🔁 Restart (Go to First Page)", key="restart"):
+            if st.button("🔁 Reset", key="restart"):
+                for key in list(st.session_state.keys()):
+                    del st.session_state[key]
                 go_first()
-                st.rerun()
+                st.rerun()  # Reloads the app from the top
