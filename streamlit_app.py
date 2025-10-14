@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import uuid
+import math
+import plotly.express as px  
 
 # --- Page configuration ---
 st.set_page_config(
@@ -21,7 +23,8 @@ PAGE_GROUPS = {
     },
     "Outputs": {
         "Project-Stage Efficiency Gains": [],
-        "Personnel Efficiency Gains": []
+        "Personnel Efficiency Gains": [],
+        "ROI": []
     }
 }
 
@@ -36,7 +39,8 @@ PAGES = [
     "BAU 2",
     "Proposed Tool",
     "Project-Stage Efficiency Gains",
-    "Personnel Efficiency Gains"
+    "Personnel Efficiency Gains",
+    "ROI"
 ]
 
 # --- Initialize session state ---
@@ -44,9 +48,8 @@ if "current_page" not in st.session_state:
     st.session_state.current_page = "Instructions How-to-use"
 
 # --- Sidebar Navigation ---
-st.sidebar.title("Sidebar Navigation")
+st.sidebar.title("Navigation")
 
-st.sidebar.markdown("### 🧭 Navigation")
 if st.sidebar.button("📘 Instructions (How-to-use)", use_container_width=True):
     st.session_state.current_page = "Instructions How-to-use"
 
@@ -381,6 +384,39 @@ def copy_from_section(source_section, target_section):
     else:
         st.warning(f"⚠️ No data found in {source_section} to copy.")
 
+def compute_projection(scenario_name, time_months, cost_per_study, impact_per_study, fixed_cost, num_orgs, include_fc_in_roi=True):
+    years = list(range(1, 51))
+    for year in years:
+        total_months = year * 12
+        studies_each_org = math.floor(total_months / time_months) if time_months > 0 else 0
+        variable_cost = cost_per_study * studies_each_org * num_orgs
+        total_cost = variable_cost + fixed_cost
+        impact = impact_per_study * studies_each_org * num_orgs
+
+        # ROI for two perspectives
+        roi_excl_fc = impact / variable_cost if variable_cost > 0 else 0
+        roi_incl_fc = impact / total_cost if total_cost > 0 else 0
+
+        projection_data.append({
+            "Scenario": scenario_name,
+            "Year": year,
+            "# of studies per org": studies_each_org,
+            "Fixed Cost ($)": fixed_cost,
+            "Variable Cost ($)": variable_cost,
+            "Total Cost ($)": total_cost,
+            "Impact ($)": impact,
+            "Impact per $ (Variable only)": roi_excl_fc,
+            "Impact per $ (Total cost)": roi_incl_fc
+        })
+
+# Extract scenario values from ROI summary
+def get_scenario_value(scenario, col):
+    try:
+        return roi_df.loc[roi_df["Scenario"] == scenario, col].values[0]
+    except:
+        return 0
+
+
 # --- Main Page ---
 st.title("ROI and Cost Analysis Dashboard")
 page = st.session_state.current_page
@@ -565,7 +601,7 @@ elif page == "ROI Parameters":
     # --- Evidence Generation ---
     st.subheader("Evidence / Discovery Rate")
     evidence_rate = st.number_input(
-        "Rate of discovery of impact",
+        "Rate of discovery of impact (%)",
         min_value=0.0,
         step=0.01,
         format="%.2f",
@@ -624,8 +660,6 @@ elif page == "ROI Parameters":
         "orgs_bau2": orgs_bau2
     }
 
-    st.markdown("✅ ROI parameters (including computed improvement) saved.")
-
 # =========================================================
 #  ASSUMPTIONS PAGES
 # =========================================================
@@ -673,13 +707,13 @@ elif page == "Assumptions":
     st.dataframe(df_assumptions, use_container_width=True)
 
     # CSV download
-    csv = df_assumptions.to_csv(index=False).encode("utf-8")
-    st.download_button(
-        label="📥 Download Assumptions as CSV",
-        data=csv,
-        file_name="assumptions.csv",
-        mime="text/csv"
-    )
+    # csv = df_assumptions.to_csv(index=False).encode("utf-8")
+    # st.download_button(
+    #     label="📥 Download Assumptions as CSV",
+    #     data=csv,
+    #     file_name="assumptions.csv",
+    #     mime="text/csv"
+    # )
 
 # =========================================================
 #  INFRASTRUCTURE PAGE
@@ -836,15 +870,6 @@ elif page == "Infrastructure Costs":
     })
     st.dataframe(summary_df, use_container_width=True)
 
-    # --- CSV download for itemized table ---
-    csv_infra = df_infra.to_csv(index=False).encode("utf-8")
-    st.download_button(
-        label="📥 Download Itemized Infrastructure Costs as CSV",
-        data=csv_infra,
-        file_name="infrastructure_costs_itemized.csv",
-        mime="text/csv"
-    )
-
     # --- Store DataFrames for later use ---
     st.session_state.df_infrastructure_costs = df_infra
     st.session_state.df_infrastructure_summary = summary_df
@@ -955,9 +980,11 @@ elif page == "Project-Stage Efficiency Gains":
         df_scenario = st.session_state.get(f"df_{scenario}", pd.DataFrame())
         for stage in project_stages:
             stage_rows = df_scenario[df_scenario["Stage"] == stage] if not df_scenario.empty else pd.DataFrame()
-            # Take the max duration per stage, ignoring multiple personnel rows
-            stage_time = stage_rows["Total Duration (weeks)"].max() if not stage_rows.empty else 0
-            durations.append(stage_time)
+            stage_time = 0
+            for step in stage_rows["Step"].unique():
+                step_rows = stage_rows[stage_rows["Step"] == step]
+                stage_time += step_rows["Total Duration (weeks)"].max() if not step_rows.empty else 0
+            durations.append(stage_time)  # Append after summing all steps in stage
         total_time_summary[f"{scenario.replace('_',' ')} Duration (weeks)"] = durations
 
     # Compute time saved (positive = time saved)
@@ -1091,6 +1118,147 @@ elif page == "Personnel Efficiency Gains":
         - The TOTAL row provides the overall project-level summary.
     """)
     st.dataframe(cost_summary, use_container_width=True)
+
+elif page == "ROI":
+    st.header("📈 Return on Investment (ROI) Analysis")
+
+    # Retrieve total project durations in weeks
+    total_time_summary = st.session_state.get("df_BAU_1", pd.DataFrame())
+    durations_weeks = {}
+    for scenario in ["BAU_1", "BAU_2", "Proposed_Tool"]:
+        df_scenario = st.session_state.get(f"df_{scenario}", pd.DataFrame())
+        total_weeks = 0
+        if not df_scenario.empty:
+            total_weeks = df_scenario.groupby("Stage")["Total Duration (weeks)"].max().sum()
+        durations_weeks[scenario] = total_weeks
+
+    # Convert weeks to months (approx 4.345 weeks/month)
+    durations_months = {k: v / 4.345 for k, v in durations_weeks.items()}
+
+    # Retrieve total costs (personnel + infrastructure)
+    cost_summary = st.session_state.get("df_infrastructure_summary", pd.DataFrame())
+    total_costs = {}
+    for scenario in ["BAU_1", "BAU_2", "Proposed_Tool"]:
+        # Sum infrastructure per-study cost
+        infra_cost = 0
+        if not cost_summary.empty:
+            infra_cost = cost_summary.loc[cost_summary["Scenario"]==scenario.replace("_"," "), "Per-Study Cost"].values[0]
+        # Add personnel cost
+        df_scenario = st.session_state.get(f"df_{scenario}", pd.DataFrame())
+        personnel_cost = 0
+        personnel_rows = st.session_state.get("personnel_rows", [])
+        for _, row in df_scenario.iterrows():
+            role = row.get("Role","")
+            pct_active = row.get("Active Time Spent (%)",0)
+            duration_weeks = row.get("Total Duration (weeks)",0)
+            hr_rate = next((p["Average Hourly Rate"] for p in personnel_rows if p["Role"]==role),0)
+            personnel_cost += duration_weeks * pct_active / 100 * 40 * hr_rate
+        total_costs[scenario] = personnel_cost + infra_cost
+
+    # Compute Impact per study
+    roi_params = st.session_state.get("roi_parameters", {})
+    per_student_improvement = roi_params.get("computed_improvement", 0)
+    evidence_rate = roi_params.get("roi_evidence_rate", 0)/100
+    total_students = roi_params.get("roi_total_students", 0)
+
+    impact_per_study = {}
+    for scenario in ["BAU_1", "BAU_2", "Proposed_Tool"]:
+        impact_per_study[scenario] = per_student_improvement * evidence_rate * total_students
+
+    # Build ROI DataFrame
+    roi_df = pd.DataFrame({
+        "Scenario": ["BAU 1", "BAU 2", "Proposed Tool"],
+        "Time (months)": [round(durations_months["BAU_1"],1),
+                        round(durations_months["BAU_2"],1),
+                        round(durations_months["Proposed_Tool"],1)],
+        "Cost ($)": [round(total_costs["BAU_1"],2),
+                    round(total_costs["BAU_2"],2),
+                    round(total_costs["Proposed_Tool"],2)],
+        "Impact per study ($)": [round(impact_per_study["BAU_1"],2),
+                                round(impact_per_study["BAU_2"],2),
+                                round(impact_per_study["Proposed_Tool"],2)]
+    })
+
+    st.dataframe(roi_df, use_container_width=True)
+
+    st.subheader("📊 50-Year ROI Projection: BAU 1 vs BAU 2 vs Proposed Tool")
+
+    # Retrieve platform parameters
+    roi_params = st.session_state.get("roi_parameters", {})
+    num_orgs_bau1 = roi_params.get("roi_orgs_bau1", 1)
+    num_orgs_bau2 = roi_params.get("roi_orgs_bau2", 1)
+    num_orgs_proposed = roi_params.get("roi_orgs_proposed", 1)
+    per_student_improvement = roi_params.get("computed_improvement", 0)
+    evidence_rate = roi_params.get("roi_evidence_rate", 0)/100
+    total_students = roi_params.get("roi_total_students", 0)
+    gates_investment = roi_params.get("roi_investment_gates", 0)
+
+    bau1_time = get_scenario_value("BAU 1", "Time (months)")
+    bau2_time = get_scenario_value("BAU 2", "Time (months)")
+    tool_time = get_scenario_value("Proposed Tool", "Time (months)")
+
+    bau1_cost = get_scenario_value("BAU 1", "Cost ($)")
+    bau2_cost = get_scenario_value("BAU 2", "Cost ($)")
+    tool_cost = get_scenario_value("Proposed Tool", "Cost ($)")
+
+    bau1_impact = get_scenario_value("BAU 1", "Impact per study ($)")
+    bau2_impact = get_scenario_value("BAU 2", "Impact per study ($)")
+    tool_impact = get_scenario_value("Proposed Tool", "Impact per study ($)")
+
+    # === User Inputs for Fixed Costs ===
+    st.markdown("#### ⚙️ Adjust Fixed Costs (if desired)")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        fixed_bau1_user = st.number_input("BAU 1 Fixed Cost ($)", value=0)
+    with col2:
+        # BAU 2 fixed = variable cost from BAU 1 to serve X orgs for 1 project
+        default_bau2_fc = bau1_cost * num_orgs_bau1
+        fixed_bau2_user = st.number_input("BAU 2 Fixed Cost ($)", value=default_bau2_fc)
+    with col3:
+        fixed_tool_user = st.number_input("Proposed Tool Fixed Cost ($)", value=gates_investment)
+
+    # === Projection Computation ===
+    projection_data = []
+
+    # Compute projections for each scenario
+    compute_projection("BAU 1", bau1_time, bau1_cost, bau1_impact, fixed_bau1_user, num_orgs_bau1)
+    compute_projection("BAU 2", bau2_time, bau2_cost, bau2_impact, fixed_bau2_user, num_orgs_bau2)
+    compute_projection("Proposed Tool", tool_time, tool_cost, tool_impact, fixed_tool_user, num_orgs_proposed)
+
+    # Convert to DataFrame
+    roi_projection_all = pd.DataFrame(projection_data)
+
+    st.dataframe(roi_projection_all, use_container_width=True)
+
+    # === Charts ===
+    st.markdown("### 📉 Impact per Dollar Over Time")
+
+    # Chart 1: Only variable cost for Proposed Tool (no FC)
+    df_chart1 = roi_projection_all.copy()
+    df_chart1.loc[df_chart1["Scenario"] == "Proposed Tool", "Impact per $ (Variable only)"] = \
+        df_chart1.loc[df_chart1["Scenario"] == "Proposed Tool", "Impact ($)"] / \
+        df_chart1.loc[df_chart1["Scenario"] == "Proposed Tool", "Variable Cost ($)"]
+
+    fig1 = px.line(
+        df_chart1,
+        x="Year",
+        y="Impact per $ (Variable only)",
+        color="Scenario",
+        title="Impact per Dollar (Variable Cost Only for Proposed Tool)",
+        markers=True
+    )
+    st.plotly_chart(fig1, use_container_width=True)
+
+    # Chart 2: Include Fixed + Variable Costs for all
+    fig2 = px.line(
+        roi_projection_all,
+        x="Year",
+        y="Impact per $ (Total cost)",
+        color="Scenario",
+        title="Impact per Dollar (Including Fixed + Variable Costs)",
+        markers=True
+    )
+    st.plotly_chart(fig2, use_container_width=True)
 
 # =========================================================
 #  FIXED NAVIGATION BUTTONS
