@@ -884,7 +884,7 @@ elif page == "Project-Stage Efficiency Gains":
     def compute_total_time(df):
         """Compute total person-weeks per stage and convert to hours."""
         if df is None or df.empty:
-            return pd.DataFrame(columns=["Stage", "Person-Weeks"])
+            return pd.DataFrame(columns=["Stage", "Person-Hours"])
         df = df.copy()
         df["Total Duration (weeks)"] = pd.to_numeric(df.get("Total Duration (weeks)", 0), errors="coerce").fillna(0)
         df["Active Time Spent (%)"] = pd.to_numeric(df.get("Active Time Spent (%)", 0), errors="coerce").fillna(0)
@@ -981,10 +981,13 @@ elif page == "Project-Stage Efficiency Gains":
         for stage in project_stages:
             stage_rows = df_scenario[df_scenario["Stage"] == stage] if not df_scenario.empty else pd.DataFrame()
             stage_time = 0
-            for step in stage_rows["Step"].unique():
-                step_rows = stage_rows[stage_rows["Step"] == step]
-                stage_time += step_rows["Total Duration (weeks)"].max() if not step_rows.empty else 0
-            durations.append(stage_time)  # Append after summing all steps in stage
+            if 'Step' in stage_rows.columns:
+                for step in stage_rows["Step"].unique():
+                    step_rows = stage_rows[stage_rows["Step"] == step]
+                    stage_time += step_rows["Total Duration (weeks)"].max() if not step_rows.empty else 0
+                durations.append(stage_time)  # Append after summing all steps in stage
+            else:
+                durations.append(stage_time)
         total_time_summary[f"{scenario.replace('_',' ')} Duration (weeks)"] = durations
 
     # Compute time saved (positive = time saved)
