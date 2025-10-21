@@ -13,9 +13,9 @@ st.set_page_config(
 
 # --- Define pages and hierarchy ---
 PAGE_GROUPS = {
-    "Instructions How-to-use": [],
+    "Instructions": [],
     "Inputs": {
-        "Personnel Salaries": [],
+        "Roles and Salaries": [],
         "Infrastructure Costs": [],
         "ROI Parameters": [],
         "Assumptions": [],
@@ -30,8 +30,8 @@ PAGE_GROUPS = {
 
 # Flatten pages for sequential navigation
 PAGES = [
-    "Instructions How-to-use",
-    "Personnel Salaries",
+    "Instructions",
+    "Roles and Salaries",
     "Infrastructure Costs",
     "ROI Parameters",
     "Assumptions",
@@ -45,13 +45,13 @@ PAGES = [
 
 # --- Initialize session state ---
 if "current_page" not in st.session_state:
-    st.session_state.current_page = "Instructions How-to-use"
+    st.session_state.current_page = "Instructions"
 
 # --- Sidebar Navigation ---
 st.sidebar.title("Navigation")
 
-if st.sidebar.button("📘 Instructions (How-to-use)", use_container_width=True):
-    st.session_state.current_page = "Instructions How-to-use"
+if st.sidebar.button("Instructions", use_container_width=True):
+    st.session_state.current_page = "Instructions"
 
 st.sidebar.markdown("### 🧩 Inputs")
 for page_name, subpages in PAGE_GROUPS["Inputs"].items():
@@ -431,29 +431,58 @@ page = st.session_state.current_page
 # =========================================================
 #  INSTRUCTIONS PAGE
 # =========================================================
-if page == "Instructions How-to-use":
+if page == "Instructions":
+    st.info(""" 
+            ### What is the purpose of this tool? ###
+            This tool was designed to help ed-tech non-profits and grantee organizations measure the value and impact of investing in building tools to support research on their platforms. It estimates potential efficiency gains, cost savings, and return on investment (ROI) from developing tools such as integrated data systems, scalable experimentation environments, and automated analysis solutions.
+            
+            **Goals**
+            - Establish a standardized framework for calculating efficiency gains across organizations.
+            - Offer data-driven comparisons between current research processes and those improved by the proposed tool.
+            - Provide clear, evidence-based insights to help both funders and non-profits understand the ROI and long-term impact of their investments.
+            """)
+    
+
     st.markdown("---")
-    st.markdown("## 🧭 Instructions (How-to-use)")
+    st.markdown("## ⚙️ Instructions")
     st.markdown("---")
 
-    st.subheader("▶️ Tutorial Video")
-    st.video("https://www.youtube.com/watch?v=_4kHxtiuML0")  # replace with your link
+    st.subheader("Before you begin")
+    st.markdown("""
+    - Before getting started, make sure you have a clear understanding of the types of research projects your proposed tool supports.
+        - For example, if you're developing an A/B testing platform to evaluate ed-tech interventions, a relevant research project might involve testing student performance on math questions with and without AI-generated hints.
+    - Consider all the key roles involved in implementing such a study, such as data engineers, data scientists, project managers, and research leads.
+    - Also consider the key steps in conducting the research, including tasks like establishing data-sharing agreements, obtaining student consent, managing data storage and security, random sampling, conducting analysis, and writing and disseminating the final report.
+    - Finally, think about which steps in the research process - and which roles involved - your proposed tool helps make more efficient, and how it does so. Consider the specific challenges your tool aims to solve, such as reducing manual effort, improving data accessibility, streamlining collaboration, or accelerating analysis and reporting.
+    - This tool guides you through the process by comparing how a research project operates today (**Business as Usual** Scenario) versus how it would function with the tool in place (**Proposed Tool** Scenario).""")
 
-    st.subheader("📘 Step-by-Step Instructions")
+    # st.subheader("▶️ Tutorial Video")
+    # st.video("https://www.youtube.com/watch?v=_4kHxtiuML0")  # replace with your link
+
+    st.subheader("Steps")
     st.markdown("""
     1. **Use the Sidebar** to navigate between pages.  
-    2. **Enter Input Data** (Salaries, Activities, Costs, etc.).  
-    3. **Adjust ROI Parameters** and **set Assumptions**.  
-    4. **View Outputs** with results and visualizations.  
-    5. Use **Next** and **Back** buttons for linear navigation.
+    2. **Enter the Input Data**
+        - **Roles and Salaries**: Specify the roles/personnel and salaries involved in conducting the research project
+        - **Infrastructure Costs**: Specify the non-personnel cost (e.g. hardware, software, storage, API usage) required to conduct the research project in both **Business as Usual** and **Proposed Tool** scenarios.
+        - **ROI Parameters**: Fill in the relevant metrics to conduct an ROI analysis for both scenarios (e.g. Number of research organizations supported concurrently, Total investment by grantees, Estimated impact of a single research project)
+        - **Assumptions (optional)**: Include any assumptions about the research project or scenarios. **For your reference only.**
+    3. **Project Activities**
+        - **Business as Usual**: Consider how the research project would run **without** the proposed tool. For each stage of the project, describe the steps involved and estimate the total time and personnel effort required. If a stage doesn't apply, you can leave it blank.
+        - **Proposed Tool**: Consider how the research project would run **with** the proposed tool. For each stage of the project, describe the steps involved and estimate the total time and personnel effort required. If a stage doesn't apply, you can leave it blank. To simplify, you can **copy estimates from the Business as Usual scenario** and make edits only for the stages where the proposed tool is expected to change time or personnel effort.
+    4. **View Outputs**
+        - **Project-Stage Efficiency Gains**: Time and cost savings for a single research project using the proposed tool, broken down by research project stage. These values are automatically calculated based on input data.
+        - **Personnel Efficiency Gains**:  Time and cost savings for a single research project using the proposed tool, broken down by personnel/roles involved. These values are automatically calculated based on input data.
+        - **ROI**: Return on investment for grantee organizations, scaled by the estimated number of organizations supported in the Business as Usual vs. Proposed Tool scenarios.
+    5. Use **Next** and **Back** buttons for step-wise navigation.
     """)
 
 # =========================================================
 #  PERSONNEL SALARIES PAGE
 # =========================================================
-elif page == "Personnel Salaries":
+elif page == "Roles and Salaries":
     st.markdown("---")
-    st.header("💼 Personnel Salaries")
+    st.header("💼 Roles and Salaries")
     st.markdown("---")
 
     # Ensure session state exists and all rows have required keys
@@ -504,21 +533,10 @@ elif page == "Personnel Salaries":
         st.rerun()
 
     # Display summary
-    st.write("### Current Personnel Table")
+    st.write("### Roles and Salaries Table")
     personnel_salaries_df = pd.DataFrame(st.session_state.personnel_rows).drop(columns="id")
     st.dataframe(personnel_salaries_df, use_container_width=True)
     st.session_state[f"df_personnel_salaries"] = personnel_salaries_df
-
-    # CSV Download
-    if len(st.session_state.personnel_rows) > 0:
-        df_download = pd.DataFrame(st.session_state.personnel_rows).drop(columns="id")
-        csv = df_download.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            label="📥 Download Table as CSV",
-            data=csv,
-            file_name="personnel_table.csv",
-            mime="text/csv"
-        )
 
 # =========================================================
 #  PROJECT ACTIVITIES PAGE
@@ -545,10 +563,10 @@ elif page == "Proposed Tool":
     st.header("📊 Proposed Tool: Project Activities")
     st.markdown("---")
 
-    if st.button("📋 Copy all values from BAU 1"):
+    if st.button("📋 Click here to copy all entries from BAU 1 to this scenario"):
         copy_from_section("BAU 1", "Proposed Tool")
 
-    if st.button("📋 Copy all values from BAU 2"):
+    if st.button("📋 Click here to copy all entries from BAU 2 to this scenario"):
         copy_from_section("BAU 2", "Proposed Tool")
 
     render_activity_section("Proposed Tool")
