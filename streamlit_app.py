@@ -1280,7 +1280,9 @@ elif page == "ROI":
     projection_data_pt = compute_projection("Proposed Tool", tool_time, tool_cost, tool_impact, fixed_tool_user, num_orgs_proposed, num_concurrent_projects)
 
     # Convert to DataFrame
-    roi_projection_all = pd.DataFrame(projection_data_bau1)
+    roi_projection_bau1 = pd.DataFrame(projection_data_bau1)
+    roi_projection_pt = pd.DataFrame(projection_data_pt)
+    roi_projection_all = pd.concat([roi_projection_bau1, roi_projection_pt])
 
     fig1 = px.line(
         roi_projection_all,
