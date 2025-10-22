@@ -15,11 +15,10 @@ st.set_page_config(
 PAGE_GROUPS = {
     "Instructions": [],
     "Inputs": {
-        "Roles and Salaries": [],
+        "Personnel Costs": [],
         "Infrastructure Costs": [],
         "ROI Parameters": [],
-        "Assumptions": [],
-        "Project Activities": ["BAU 1", "BAU 2", "Proposed Tool"],
+        "Project Activities": ["Business as Usual", "Proposed Tool"],
     },
     "Outputs": {
         "Project-Stage Efficiency Gains": [],
@@ -31,12 +30,10 @@ PAGE_GROUPS = {
 # Flatten pages for sequential navigation
 PAGES = [
     "Instructions",
-    "Roles and Salaries",
+    "Personnel Costs",
     "Infrastructure Costs",
     "ROI Parameters",
-    "Assumptions",
-    "BAU 1",
-    "BAU 2",
+    "Business as Usual",
     "Proposed Tool",
     "Project-Stage Efficiency Gains",
     "Personnel Efficiency Gains",
@@ -106,8 +103,7 @@ st.markdown("""
 # --- Initialize session state for storing activity data ---
 if "project_steps" not in st.session_state:
     st.session_state.project_steps = {
-        "BAU 1": {},
-        "BAU 2": {},
+        "BAU": {},
         "Proposed Tool": {}
     }
 
@@ -135,12 +131,6 @@ project_stages = [
 
 # --- Helper function to render activity sections ---
 def render_activity_section(section_name):
-    st.caption(
-        "You may edit, replace, or enter N/A for the activities so that they align with the type of projects your tool supports. "
-        "The listed activities are only intended as examples. Where relevant, please include a brief description (1-2 lines) "
-        "of the activity. Overall project stage titles remain unchanged as a consistent framework across projects."
-    )
-
     # List to collect all preview data
     all_preview_data = []
 
@@ -171,7 +161,7 @@ def render_activity_section(section_name):
                         {
                             "id": str(uuid.uuid4()),
                             "Step": "Consenting Participants",
-                            "Notes": "",
+                            "Notes": "e.g. Obtaining consent from users / students using the curriculum platform through ToS, pop-up or checkbox, or another form of notification",
                             "Duration": 0.0,
                             "Roles": {r: 0.0 for r in personnel_roles}
                         }
@@ -181,14 +171,14 @@ def render_activity_section(section_name):
                         {
                             "id": str(uuid.uuid4()),
                             "Step": "Data Collection, Documentation, Anonymization (i.e. Data setup)",
-                            "Notes": "",
+                            "Notes": "e.g. Collecting individual observations. Data querying and extraction: querying, verification, troubleshooting. Data anonymization, establishing protocol, implementation, review. Data documentation: data dictionary, access instructions. Final review",
                             "Duration": 0.0,
                             "Roles": {r: 0.0 for r in personnel_roles}
                         },
                         {
                             "id": str(uuid.uuid4()),
                             "Step": "Secure data access / transfer to researchers",
-                            "Notes": "",
+                            "Notes": "e.g. District may share data through file storage solution (e.g. CSVs on Microsoft SharePoint). Setup requires account setup, transferring data, configuring permissions. Education platform shares data via access to certain tables or views on their database. Setup may require VPN setup for an external user, configure persmissions, test & verify. Researcher: may need to install certain software and configure their system to securely access the data shared.",
                             "Duration": 0.0,
                             "Roles": {r: 0.0 for r in personnel_roles}
                         }
@@ -198,7 +188,7 @@ def render_activity_section(section_name):
                         {
                             "id": str(uuid.uuid4()),
                             "Step": "Data Review or Quality Check, Data Cleaning & Merging",
-                            "Notes": "",
+                            "Notes": "e.g. Researcher may: Review data to understand format and key fields. Assess & Fix data issues / quality (checking for missing values, duplicates, standardized values, etc.). Merge & validate datasets. District / Education platform may: address any data questions. fix data issues, as required (e.g. if some data is missing)",
                             "Duration": 0.0,
                             "Roles": {r: 0.0 for r in personnel_roles}
                         }
@@ -208,21 +198,21 @@ def render_activity_section(section_name):
                         {
                             "id": str(uuid.uuid4()),
                             "Step": "Exploratory Data Analysis to guide Study Design",
-                            "Notes": "",
+                            "Notes": "e.g. Researcher will compile descriptive and statistical analyses to understand data distributions, possible correlations, run power calculations, determine randomization strategy, etc. in order to guide the model/analysis design.",
                             "Duration": 0.0,
                             "Roles": {r: 0.0 for r in personnel_roles}
                         },
                         {
                             "id": str(uuid.uuid4()),
                             "Step": "Data preparation to implement the study",
-                            "Notes": "",
+                            "Notes": "e.g. if it is an A/B testing study, you may need to develop the content or implement feature changes to the educational platform which may include: create / update / review content, create variants (for A/B testing), update database / UI changes",
                             "Duration": 0.0,
                             "Roles": {r: 0.0 for r in personnel_roles}
                         },
                         {
                             "id": str(uuid.uuid4()),
                             "Step": "Setting up the infrastructure to execute or run the experiment",
-                            "Notes": "",
+                            "Notes": "e.g. if it is an A/B testing study, and you are setting up A/B testing operations for the first time, you may need to: setup the database, setup the data pipeline to ingest, process, and analyze data, build a dashboard to report analytics or metrics, integrate the data or study content into the platform, test or validate the platform (QA checks), prepare documentation or training sessions",
                             "Duration": 0.0,
                             "Roles": {r: 0.0 for r in personnel_roles}
                         }
@@ -232,7 +222,7 @@ def render_activity_section(section_name):
                         {
                             "id": str(uuid.uuid4()),
                             "Step": "Run the study",
-                            "Notes": "",
+                            "Notes": "e.g. Run a pilot study (i.e. testing that the A/B testing works as expected) before scaling to entire data sample. Running the actual study. Periodic data sharing and monitoring over the study implementation period.",
                             "Duration": 0.0,
                             "Roles": {r: 0.0 for r in personnel_roles}
                         }
@@ -242,7 +232,7 @@ def render_activity_section(section_name):
                         {
                             "id": str(uuid.uuid4()),
                             "Step": "Analysis & QA",
-                            "Notes": "",
+                            "Notes": "e.g. verify that the experiment was conducted correctly, statistcal analyses or models (e.g. using Machine Learning) to analyze data, interpret findings, produce descriptives or graphs",
                             "Duration": 0.0,
                             "Roles": {r: 0.0 for r in personnel_roles}
                         }
@@ -252,7 +242,7 @@ def render_activity_section(section_name):
                         {
                             "id": str(uuid.uuid4()),
                             "Step": "Report writing & communications",
-                            "Notes": "",
+                            "Notes": "e.g. setup a dashboard communicate results, publish research paper / whitepaper, blog post, disseminate findings to broader community, proposal for next steps",
                             "Duration": 0.0,
                             "Roles": {r: 0.0 for r in personnel_roles}
                         }
@@ -260,7 +250,7 @@ def render_activity_section(section_name):
                 else:
                     st.session_state.project_steps[section_name][stage] = [{
                         "id": str(uuid.uuid4()),
-                        "Step": "<placeholder>",
+                        "Step": "",
                         "Notes": "",
                         "Duration": 0.0,
                         "Roles": {r: 0.0 for r in personnel_roles}
@@ -269,28 +259,18 @@ def render_activity_section(section_name):
             rows = st.session_state.project_steps[section_name][stage]
 
             for idx, row in enumerate(rows.copy()):
-                st.markdown(f"""
-                <div style="
-                    background-color: #c2e5d3; 
-                    padding: 15px; 
-                    border-radius: 8px; 
-                    margin-bottom: 15px;
-                    border: 1px solid #c2e5d3;
-                ">
-                """, unsafe_allow_html=True)
-
-                st.markdown(f"**Step {idx+1}**")
+                st.markdown(f"<span style='color:#DF7861; font-weight:bold;'>**Step {idx+1}**</span>", unsafe_allow_html=True)
 
                 # Step Description + Notes
                 cols1 = st.columns([4, 4])
                 step_desc = cols1[0].text_area(
                     "Step Description",
-                    value=row.get("Step", "<placeholder>"),
+                    value=row.get("Step", ""),
                     key=f"{section_name}_{stage}_step_{row['id']}",
                     height=80
                 )
                 notes = cols1[1].text_area(
-                    "Notes (e.g., Explain how time/labor changes wrt BAU1/BAU2)",
+                    "Notes",
                     value=row.get("Notes", ""),
                     key=f"{section_name}_{stage}_notes_{row['id']}",
                     height=80
@@ -307,37 +287,51 @@ def render_activity_section(section_name):
                     value=row.get("Duration", 0.0),
                     key=f"{section_name}_{stage}_dur_{row['id']}"
                 )
+                
                 row["Duration"] = duration
 
-                # Active Time per Role
-                st.markdown("**% Active Time per Role**")
+                # Active time % per role
+                st.markdown(f"<span style='color:#ECB390;'>*% Active Time Spent per Role*</span>", unsafe_allow_html=True)
                 time_data = {}
-                for role in personnel_roles:
-                    val = st.number_input(
-                        f"{role}",
-                        min_value=0.0,
-                        step=1.0,
-                        value=row.get("Roles", {}).get(role, 0.0),
-                        format="%.2f",
-                        key=f"{section_name}_{stage}_{role}_{row['id']}"
-                    )
-                    time_data[role] = val
+                roles_per_row = 5
+                for i in range(0, len(personnel_roles), roles_per_row):
+                    role_subset = personnel_roles[i:i + roles_per_row]
+                    
+                    # Create 5 equal-width columns no matter how many roles are in this subset
+                    cols = st.columns(roles_per_row)
+
+                    for j, role in enumerate(role_subset):
+                        with cols[j]:
+                            val = st.number_input(
+                                f"{role}",
+                                min_value=0.0,
+                                step=1.0,
+                                value=row.get("Roles", {}).get(role, 0.0),
+                                format="%.2f",
+                                key=f"{section_name}_{stage}_{role}_{row['id']}"
+                            )
+                            time_data[role] = val
+
+                    # Fill remaining columns with empty space if fewer than 5 roles
+                    for j in range(len(role_subset), roles_per_row):
+                        with cols[j]:
+                            st.markdown("")  # keeps layout aligned
                 row["Roles"] = time_data
 
                 # Delete Step
-                if st.button("❌ Delete Step", key=f"del_{section_name}_{stage}_{row['id']}"):
+                if st.button("❌ Delete", key=f"del_{section_name}_{stage}_{row['id']}"):
                     st.session_state.project_steps[section_name][stage] = [
                         r for r in rows if r["id"] != row["id"]
                     ]
                     st.rerun()
-
-                st.markdown("</div>", unsafe_allow_html=True)
+                    
+                st.markdown("---")
 
             # Add new step
             if st.button(f"➕ Add Step to {stage}", key=f"add_{section_name}_{stage}"):
                 new_row = {
                     "id": str(uuid.uuid4()),
-                    "Step": "<placeholder>",
+                    "Step": "",
                     "Notes": "",
                     "Duration": 0.0,
                     "Roles": {r: 0.0 for r in personnel_roles}
@@ -463,10 +457,9 @@ if page == "Instructions":
     st.markdown("""
     1. **Use the Sidebar** to navigate between pages.  
     2. **Enter the Input Data**
-        - **Roles and Salaries**: Specify the roles/personnel and salaries involved in conducting the research project
+        - **Personnel Costs**: Specify the roles/personnel and salaries involved in conducting the research project
         - **Infrastructure Costs**: Specify the non-personnel cost (e.g. hardware, software, storage, API usage) required to conduct the research project in both **Business as Usual** and **Proposed Tool** scenarios.
         - **ROI Parameters**: Fill in the relevant metrics to conduct an ROI analysis for both scenarios (e.g. Number of research organizations supported concurrently, Total investment by grantees, Estimated impact of a single research project)
-        - **Assumptions (optional)**: Include any assumptions about the research project or scenarios. **For your reference only.**
     3. **Project Activities**
         - **Business as Usual**: Consider how the research project would run **without** the proposed tool. For each stage of the project, describe the steps involved and estimate the total time and personnel effort required. If a stage doesn't apply, you can leave it blank.
         - **Proposed Tool**: Consider how the research project would run **with** the proposed tool. For each stage of the project, describe the steps involved and estimate the total time and personnel effort required. If a stage doesn't apply, you can leave it blank. To simplify, you can **copy estimates from the Business as Usual scenario** and make edits only for the stages where the proposed tool is expected to change time or personnel effort.
@@ -480,9 +473,9 @@ if page == "Instructions":
 # =========================================================
 #  PERSONNEL SALARIES PAGE
 # =========================================================
-elif page == "Roles and Salaries":
+elif page == "Personnel Costs":
     st.markdown("---")
-    st.header("💼 Roles and Salaries")
+    st.header("💼 Personnel Costs")
     st.markdown("---")
 
     # Ensure session state exists and all rows have required keys
@@ -506,8 +499,9 @@ elif page == "Roles and Salaries":
         row.setdefault("Average Hourly Rate", 0.0)
         row.setdefault("Notes", "")
 
-        st.markdown(f"**Role #{idx+1}**")
-        cols = st.columns([3, 2, 4, 1])  # Narrow column for trash icon
+        st.markdown(f"<span style='color:#DF7861'>***Personnel {idx+1}***</span>", unsafe_allow_html=True)
+
+        cols = st.columns([4, 3, 7, 1])  # Narrow column for trash icon
 
         # Editable inputs
         role = cols[0].text_input("Role", row["Role"], key=f"role_{row['id']}")
@@ -533,7 +527,7 @@ elif page == "Roles and Salaries":
         st.rerun()
 
     # Display summary
-    st.write("### Roles and Salaries Table")
+    st.write("### Personnel Costs Table")
     personnel_salaries_df = pd.DataFrame(st.session_state.personnel_rows).drop(columns="id")
     st.dataframe(personnel_salaries_df, use_container_width=True)
     st.session_state[f"df_personnel_salaries"] = personnel_salaries_df
@@ -541,33 +535,36 @@ elif page == "Roles and Salaries":
 # =========================================================
 #  PROJECT ACTIVITIES PAGE
 # =========================================================
-elif page == "BAU 1":
+elif page == "Business as Usual":
     st.markdown("---")
-    st.header("📊 BAU 1: Project Activities")
+    st.header("📊 Project Activities: *Business as Usual Scenario*")
     st.markdown("---")
-
-    render_activity_section("BAU 1")
-
-elif page == "BAU 2":
-    st.markdown("---")
-    st.header("📊 BAU 2: Project Activities")
-    st.markdown("---")
-
-    if st.button("📋 Copy all values from BAU 1"):
-        copy_from_section("BAU 1", "BAU 2")
-
-    render_activity_section("BAU 2")
+    st.caption(
+        "Overall project stage titles remain unchanged to serve as consistent framework across projects." \
+        " The steps listed under each project stage are intended as a guiding framework to help you complete this section. You may edit, add, or delete the steps under each project stage so that they align with the types of projects your tool supports. "
+        " " \
+        "Please note: deleting a step means it is not required to complete the research project. Even if your proposed tool does not target a particular step, the step must be included if it is relevant to conducting the research project."
+        " You may also include any additional notes related to the execution of each project step. This is particularly useful in the ***Proposed Tool*** scenario to explain why a step shows a significant difference in total time or personnel effort compared to ***Business as Usual***."
+    )
+    render_activity_section("BAU")
 
 elif page == "Proposed Tool":
     st.markdown("---")
-    st.header("📊 Proposed Tool: Project Activities")
+    st.header("📊 Project Activities: *Proposed Tool*")
     st.markdown("---")
+    st.caption(
+        "Overall project stage titles remain unchanged to serve as consistent framework across projects." \
+        " The steps listed under each project stage are intended as a guiding framework to help you complete this section. You may edit, add, or delete the steps under each project stage so that they align with the types of projects your tool supports. "
+        " Please note: deleting a step means it is not required to complete the research project. Even if your proposed tool does not target a particular step, the step must be included if it is relevant to conducting the research project."
+        " You may include any additional notes related to the execution of each project step. This is particularly useful in the ***Proposed Tool*** scenario to explain why a step shows a significant difference in total time or personnel effort compared to ***Business as Usual***."
+    )
 
-    if st.button("📋 Click here to copy all entries from BAU 1 to this scenario"):
-        copy_from_section("BAU 1", "Proposed Tool")
-
-    if st.button("📋 Click here to copy all entries from BAU 2 to this scenario"):
-        copy_from_section("BAU 2", "Proposed Tool")
+    if st.button(
+        "📋 Pre-Fill estimates from Business as Usual",
+        help="Copy all estimates from the Business as Usual scenario to save time. You can then adjust only where the proposed tool changes things.",
+        key="pre_fill_button"
+    ):
+        copy_from_section("Business as Usual", "Proposed Tool")
 
     render_activity_section("Proposed Tool")
 
@@ -580,36 +577,53 @@ elif page == "ROI Parameters":
     st.markdown("---")
 
     # --- Median Impact on Learning Outcomes ---
-    st.subheader("Estimated Impact of Research Project")
-    col1, col2 = st.columns([3, 1])
+    st.markdown("<h3 style='color:#ECB390;'>Estimated Impact of Research Project</h3>", unsafe_allow_html=True)
+
+
+    # --- Primary Outcome ---
+    col1, col2 = st.columns([3, 2])
     with col1:
         learning_definition = st.text_input(
-            "Definition of median impact on learning outcomes (in SD terms)",
-            placeholder="e.g., Median impact on standardized math scores (in SD)"
+            "Primary outcome used to evaluate research project impact",
+            value="Standardized math scores in middle school",
+            help="Specify the outcome that a research project supported by the proposed tool is evaluated on to measure effectiveness or success."
         )
     with col2:
         learning_sd = st.number_input(
             "Median impact (SD)",
             min_value=0.0,
-            placeholder=0.12,
+            value=0.12,
             step=0.01,
             format="%.2f",
-            key="roi_learning_sd"
+            key="roi_learning_sd",
+            help='Specify estimated median impact in standard deviations. Cross-reference relevant literature.'
         )
 
+    # Add spacing
+    st.write("")
+
     # --- Economic Opportunity Coefficient ---
-    econ_definition = st.text_input(
-        "Definition of average increase in long-term economic opportunity per 1 SD improvement (in $ terms)",
-        placeholder="e.g. avg. increase in income at 30 for 1 SD improvement in math scores in middle school"
-    )
-    econ_per_sd = st.number_input(
-        "Average Economic increase per 1 SD (in $)",
-        min_value=0.0,
-        placeholder=2400,
-        step=0.01,
-        format="%.2f",
-        key="roi_econ_per_sd"
-    )
+    col1, col2 = st.columns([3, 2])
+    with col1:
+        econ_definition = st.text_input(
+            "Long-term economic opportunity outcome",
+            help="Specify the long-term economic outcome that the primary outcome influences",
+            value="Income at age 30"
+        )
+    with col2:
+        econ_per_sd = st.number_input(
+            "Average increase per 1 SD improvement ($)",
+            min_value=0.0,
+            value=2400.0,
+            step=0.1,
+            format="%.2f",
+            help="Enter the expected average increase in the long-term economic opportunity outcome for a 1 standard deviation improvement in the primary outcome",
+            key="roi_econ_per_sd"
+        )
+
+    # Add spacing after
+    st.write("")
+
 
     # --- Per-Student Outcome Improvement (Computed) ---
     computed_improvement = learning_sd * econ_per_sd
@@ -617,51 +631,86 @@ elif page == "ROI Parameters":
                     disabled=True)
 
     # --- Evidence Generation ---
-    st.subheader("Evidence / Discovery Rate")
+    st.markdown("<h3 style='color:#ECB390;'>Discovery Rate</h3>", unsafe_allow_html=True)
     evidence_rate = st.number_input(
         "Rate of discovery of impact (%)",
         min_value=0.0,
-        step=0.01,
+        max_value=100.0,
+        value=10.0,
+        step=1.0,
         format="%.2f",
-        key="roi_evidence_rate"
+        key="roi_evidence_rate",
+        help="The estimated probability that a research project will detect measurable impact in the primary outcome"
     )
 
-    # --- Reach & Investment ---
-    st.subheader("Reach & Investment")
-    total_students = st.number_input(
-        "Total number of students served by platform / tool",
-        min_value=1,
-        step=1,
-        key="roi_total_students"
-    )
-    total_investment = st.number_input(
-        "Total investment by grant organization in the tool (in $)",
-        min_value=0,
-        step=1000,
-        format="%d",
-        key="roi_total_investment_k"
-    )
+    # --- Research Study Reach & Investment ---
+    st.markdown("<h3 style='color:#ECB390;'>Reach and Impact</h3>", unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        total_students = st.number_input(
+            "Total reach of the research study (number of individuals impacted).",
+            min_value=1,
+            step=1,
+            key="roi_total_students",
+            help="Enter the total number of individuals affected by the research project. E.g., the number of students on the ed-tech platform that implements a research intervention."
+        )
 
-    # --- Organizations Served ---
-    st.subheader("Organizations Served")
-    orgs_proposed = st.number_input(
-        "Number of organizations served by proposed tool",
-        min_value=1,
-        step=1,
-        key="roi_orgs_proposed"
-    )
-    orgs_bau1 = st.number_input(
-        "Number of organizations served under BAU scenario 1",
-        min_value=1,
-        step=1,
-        key="roi_orgs_bau1"
-    )
-    orgs_bau2 = st.number_input(
-        "Number of organizations served under BAU scenario 2",
-        min_value=1,
-        step=1,
-        key="roi_orgs_bau2"
-    )
+    with col2:
+        total_investment = st.number_input(
+            "Total investment by grant organization in the tool (in $)",
+            min_value=0,
+            step=1000,
+            format="%d",
+            key="roi_total_investment_k"
+        )
+
+    # --- Organizations Served (side by side) ---
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        orgs_bau1 = st.number_input(
+            "Orgs supported (Business as Usual)",
+            min_value=1,
+            step=1,
+            value=1,
+            key="roi_orgs_bau1",
+            help=(
+                "Specify the number of organizations that can use the solution in the Business as Usual scenario. "
+                "The total number of concurrent projects depends on:\n"
+                "- The number of organizations using the solution (BAU or proposed tool).\n"
+                "- The number of projects each organization can run concurrently."
+            )
+        )
+
+    with col2:
+        orgs_proposed = st.number_input(
+            "Orgs supported (Proposed Tool)",
+            min_value=1,
+            step=1,
+            value=1,
+            key="roi_orgs_proposed",
+            help=(
+                "Specify the number of organizations that can use the solution in the Proposed Tool scenario. "
+                "The total number of concurrent projects depends on:\n"
+                "- The number of organizations using the solution (BAU or proposed tool).\n"
+                "- The number of projects each organization can run concurrently."
+            )
+        )
+
+    with col3:
+        studies_proposed = st.number_input(
+            "Concurrent research projects per org",
+            min_value=1,
+            value=1,
+            step=1,
+            key="roi_studies_proposed",
+            help=(
+                "Specify how many research studies each organization can run at the same time using the solution. "
+                "The total number of concurrent studies depends on:\n"
+                "- The number of organizations using the solution (BAU or proposed tool).\n"
+                "- The number of studies each organization can run concurrently."
+            )
+        )
 
     # --- Save all ROI parameters in session_state for later use ---
     st.session_state.roi_parameters = {
@@ -675,7 +724,7 @@ elif page == "ROI Parameters":
         "total_investment_k": total_investment,
         "orgs_proposed": orgs_proposed,
         "orgs_bau1": orgs_bau1,
-        "orgs_bau2": orgs_bau2
+        "studies_proposed": studies_proposed
     }
 
 # =========================================================
@@ -738,19 +787,16 @@ elif page == "Assumptions":
 # =========================================================
 elif page == "Infrastructure Costs":
     st.markdown("---")
-    st.header("🏗️ Infrastructure Costs")
+    st.header("💻 Infrastructure Costs")
     st.markdown("---")
 
     st.caption(
-        "Enter annual infrastructure or operational costs for each scenario below. "
-        "You can adjust cost amounts, add notes, and compute per-study costs automatically."
-    )
-
-    # --- Notes ---
-    st.info(
-        "The cost estimate reflects the **total cost incurred per study**, i.e., for the end-users who are:\n"
-        "- researchers and organizations that integrate the proposed tool or build their own (as in BAUs), and\n"
-        "- the platform that maintains the proposed tool."
+        "Enter the annual **infrastructure costs** (e.g., hardware, software, storage, API usage) for both the Business as Usual and Proposed Tool scenarios. "
+        "These are non-personnel operational costs. Annual costs are used because research organizations typically pay for subscriptions or services on a yearly basis. "
+        "Per-study costs can then be approximated by scaling these annual costs by the number of studies conducted per year. "
+        "Alternatively, if you prefer, you may instead enter the exact costs for the specific research project and set the number of studies per year to 1. "
+        "The cost catgeories listed below are a guiding framework. You may edit/add/delete cost categories, adjust amounts, and add notes as needed."
+        " The estimates represent the **total infrastructure cost** from the perspective of a single end user, i.e., a research organization that the proposed tool supports."
     )
 
     # --- Initialize with prefilled categories but no costs ---
@@ -759,86 +805,74 @@ elif page == "Infrastructure Costs":
             {
                 "id": str(uuid.uuid4()),
                 "Cost Category (annual costs)": "Integration Costs",
-                "BAU 1": 0.0,
-                "BAU 2": 0.0,
+                "Business as Usual": 0.0,
                 "Proposed Tool": 0.0,
-                "Notes / Assumptions": ""
+                "Notes": "e.g. Proposed tool requires API integration with the organization's codebase."
             },
             {
                 "id": str(uuid.uuid4()),
                 "Cost Category (annual costs)": "Software Licenses",
-                "BAU 1": 0.0,
-                "BAU 2": 0.0,
+                "Business as Usual": 0.0,
                 "Proposed Tool": 0.0,
-                "Notes / Assumptions": ""
+                "Notes": "e.g. Researchers require Stata for analysis."
             },
             {
                 "id": str(uuid.uuid4()),
                 "Cost Category (annual costs)": "Compute Resources",
-                "BAU 1": 0.0,
-                "BAU 2": 0.0,
+                "Business as Usual": 0.0,
                 "Proposed Tool": 0.0,
-                "Notes / Assumptions": ""
+                "Notes": "e.g. Researchers require GPUs for big data analysis."
             },
             {
                 "id": str(uuid.uuid4()),
                 "Cost Category (annual costs)": "Storage",
-                "BAU 1": 0.0,
-                "BAU 2": 0.0,
+                "Business as Usual": 0.0,
                 "Proposed Tool": 0.0,
-                "Notes / Assumptions": ""
+                "Notes": "e.g. Researchers require cloud storage for data access."
             }
         ]
 
     # --- Editable Cost Inputs ---
     rows = st.session_state.infrastructure_costs
     for idx, row in enumerate(rows):
-        st.markdown(f"Cost Item #{idx + 1}")
-        cols = st.columns([3, 1, 1, 1, 3, 1])
+        st.markdown(f"<span style='color:#DF7861'>***Cost Item {idx + 1}***</span>", unsafe_allow_html=True)
 
+        cols = st.columns([3, 2, 2, 3, 1])
         category = cols[0].text_input(
             "Cost Category (annual costs)",
             value=row["Cost Category (annual costs)"],
             key=f"cat_{row['id']}"
         )
-        bau1 = cols[1].number_input(
-            "BAU 1",
+        BAU = cols[1].number_input(
+            "Business as Usual",
             min_value=0.0,
             step=10.0,
-            value=float(row["BAU 1"]),
+            value=float(row["Business as Usual"]),
             key=f"bau1_{row['id']}"
         )
-        bau2 = cols[2].number_input(
-            "BAU 2",
-            min_value=0.0,
-            step=10.0,
-            value=float(row["BAU 2"]),
-            key=f"bau2_{row['id']}"
-        )
-        proposed = cols[3].number_input(
-            "Prop. Tool",
+        proposed = cols[2].number_input(
+            "Proposed Tool",
             min_value=0.0,
             step=10.0,
             value=float(row["Proposed Tool"]),
             key=f"tool_{row['id']}"
         )
-        notes = cols[4].text_input(
-            "Notes / Assumptions",
-            value=row["Notes / Assumptions"],
+        notes = cols[3].text_input(
+            "Notes",
+            value=row["Notes"],
             key=f"notes_{row['id']}"
         )
 
-        if cols[5].button("❌", key=f"del_cost_{row['id']}"):
+        if cols[4].button("❌", key=f"del_cost_{row['id']}"):
             st.session_state.infrastructure_costs = [r for r in rows if r["id"] != row["id"]]
             st.rerun()
 
         # Update stored row
         row.update({
-            "Cost Category (annual costs)": category,
-            "BAU 1": bau1,
-            "BAU 2": bau2,
+            "Cost Category": category,
+            "Business as Usual": BAU,
             "Proposed Tool": proposed,
-            "Notes / Assumptions": notes
+            "Notes": notes
         })
 
     # --- Add new row button ---
@@ -846,10 +880,9 @@ elif page == "Infrastructure Costs":
         st.session_state.infrastructure_costs.append({
             "id": str(uuid.uuid4()),
             "Cost Category (annual costs)": "",
-            "BAU 1": 0.0,
-            "BAU 2": 0.0,
+            "Business as Usual": 0.0,
             "Proposed Tool": 0.0,
-            "Notes / Assumptions": ""
+            "Notes": ""
         })
         st.rerun()
 
@@ -858,33 +891,35 @@ elif page == "Infrastructure Costs":
 
 
     # --- Studies conducted per year ---
+    st.markdown("---")
+    st.markdown("<h3 style='color:#ECB390;'>Studies per Year</h3>", unsafe_allow_html=True)
     studies_per_year = st.number_input(
-        "📚 Studies Conducted per Year",
+        "Number of studies conducted per year by an organization",
         min_value=1.0,
         step=1.0,
         value=1.0,
-        format="%.0f"
+        format="%.0f",
+        help="Total infrastructure costs are divided by this number to calculate the per-study cost."
     )
+    st.markdown("---")
 
     # --- Compute totals ---
-    total_bau1 = df_infra["BAU 1"].sum()
-    total_bau2 = df_infra["BAU 2"].sum()
+    total_bau1 = df_infra["Business as Usual"].sum()
     total_tool = df_infra["Proposed Tool"].sum()
 
     per_study_bau1 = total_bau1 / studies_per_year
-    per_study_bau2 = total_bau2 / studies_per_year
     per_study_tool = total_tool / studies_per_year
 
     # --- Itemized Preview Table ---
-    st.markdown("### 🧾 Itemized Infrastructure Costs")
+    st.markdown("### Itemized Infrastructure Costs")
     st.dataframe(df_infra, use_container_width=True)
 
     # --- Summary Preview Table ---
-    st.markdown("### 💰 Summary of Total & Per-Study Costs")
+    st.markdown("### Total Annual & Per-Study Infrastructure Costs")
     summary_df = pd.DataFrame({
-        "Scenario": ["BAU 1", "BAU 2", "Proposed Tool"],
-        "Total Annual Cost": [total_bau1, total_bau2, total_tool],
-        "Per-Study Cost": [per_study_bau1, per_study_bau2, per_study_tool]
+        "Scenario": ["Business as Usual", "Proposed Tool"],
+        "Total Annual Cost": [total_bau1, total_tool],
+        "Per-Study Cost": [per_study_bau1, per_study_tool]
     })
     st.dataframe(summary_df, use_container_width=True)
 
@@ -914,41 +949,34 @@ elif page == "Project-Stage Efficiency Gains":
         return df_hours[["Stage", "Person-Hours"]]
 
     # --- Retrieve DataFrames ---
-    df_bau1 = st.session_state.get("df_BAU_1", pd.DataFrame())
-    df_bau2 = st.session_state.get("df_BAU_2", pd.DataFrame())
+    df_bau1 = st.session_state.get("df_BAU", pd.DataFrame())
     df_tool = st.session_state.get("df_Proposed_Tool", pd.DataFrame())
     personnel_rows = st.session_state.get("personnel_rows", [])
 
     # --- Time Table ---
     df_time_bau1 = compute_total_time(df_bau1)
-    df_time_bau2 = compute_total_time(df_bau2)
     df_time_tool = compute_total_time(df_tool)
 
     # Merge by Stage
     time_summary = pd.DataFrame({"Stage": project_stages})
-    time_summary = time_summary.merge(df_time_bau1, on="Stage", how="left").rename(columns={"Person-Hours": "BAU 1 (hrs)"}).fillna(0)
-    time_summary = time_summary.merge(df_time_bau2, on="Stage", how="left").rename(columns={"Person-Hours": "BAU 2 (hrs)"}).fillna(0)
+    time_summary = time_summary.merge(df_time_bau1, on="Stage", how="left").rename(columns={"Person-Hours": "Business as Usual (hrs)"}).fillna(0)
     time_summary = time_summary.merge(df_time_tool, on="Stage", how="left").rename(columns={"Person-Hours": "Proposed Tool (hrs)"}).fillna(0)
 
     # Compute time saved
-    time_summary["Time Saved vs BAU1 (hrs)"] = time_summary["BAU 1 (hrs)"] - time_summary["Proposed Tool (hrs)"]
-    time_summary["Time Saved vs BAU2 (hrs)"] = time_summary["BAU 2 (hrs)"] - time_summary["Proposed Tool (hrs)"]
-
+    time_summary["Time Saved vs BAU (hrs)"] = time_summary["Business as Usual (hrs)"] - time_summary["Proposed Tool (hrs)"]
     # Add totals row
     total_time_row = pd.DataFrame([{
         "Stage": "TOTAL",
-        "BAU 1 (hrs)": time_summary["BAU 1 (hrs)"].sum(),
-        "BAU 2 (hrs)": time_summary["BAU 2 (hrs)"].sum(),
+        "Business as Usual (hrs)": time_summary["Business as Usual (hrs)"].sum(),
         "Proposed Tool (hrs)": time_summary["Proposed Tool (hrs)"].sum(),
-        "Time Saved vs BAU1 (hrs)": time_summary["Time Saved vs BAU1 (hrs)"].sum(),
-        "Time Saved vs BAU2 (hrs)": time_summary["Time Saved vs BAU2 (hrs)"].sum()
+        "Time Saved vs BAU (hrs)": time_summary["Time Saved vs BAU (hrs)"].sum()
     }])
     time_summary = pd.concat([time_summary, total_time_row], ignore_index=True)
 
     # --- Cost Table ---
     cost_summary = pd.DataFrame({"Stage": project_stages})
 
-    for scenario in ["BAU_1", "BAU_2", "Proposed_Tool"]:
+    for scenario in ["BAU", "Proposed_Tool"]:
         costs = []
         df_scenario = st.session_state.get(f"df_{scenario}", pd.DataFrame())
         for stage in project_stages:
@@ -969,31 +997,27 @@ elif page == "Project-Stage Efficiency Gains":
     if not infra_costs.empty:
         infra_row = {
             "Stage": "Infrastructure",
-            "BAU 1 Cost ($)": infra_costs.loc[infra_costs["Scenario"]=="BAU 1", "Per-Study Cost"].values[0],
-            "BAU 2 Cost ($)": infra_costs.loc[infra_costs["Scenario"]=="BAU 2", "Per-Study Cost"].values[0],
+            "BAU Cost ($)": infra_costs.loc[infra_costs["Scenario"]=="Business as Usual", "Per-Study Cost"].values[0],
             "Proposed Tool Cost ($)": infra_costs.loc[infra_costs["Scenario"]=="Proposed Tool", "Per-Study Cost"].values[0]
         }
         cost_summary = pd.concat([cost_summary, pd.DataFrame([infra_row])], ignore_index=True)
 
     # --- Compute Cost Saved ---
-    cost_summary["Cost Saved vs BAU1 ($)"] = cost_summary["BAU 1 Cost ($)"] - cost_summary["Proposed Tool Cost ($)"]
-    cost_summary["Cost Saved vs BAU2 ($)"] = cost_summary["BAU 2 Cost ($)"] - cost_summary["Proposed Tool Cost ($)"]
+    cost_summary["Cost Saved vs BAU ($)"] = cost_summary["BAU Cost ($)"] - cost_summary["Proposed Tool Cost ($)"]
 
     # --- Add TOTAL row ---
     total_row = pd.DataFrame([{
         "Stage": "TOTAL",
-        "BAU 1 Cost ($)": cost_summary["BAU 1 Cost ($)"].sum(),
-        "BAU 2 Cost ($)": cost_summary["BAU 2 Cost ($)"].sum(),
+        "BAU Cost ($)": cost_summary["BAU Cost ($)"].sum(),
         "Proposed Tool Cost ($)": cost_summary["Proposed Tool Cost ($)"].sum(),
-        "Cost Saved vs BAU1 ($)": cost_summary["Cost Saved vs BAU1 ($)"].sum(),
-        "Cost Saved vs BAU2 ($)": cost_summary["Cost Saved vs BAU2 ($)"].sum()
+        "Cost Saved vs BAU ($)": cost_summary["Cost Saved vs BAU ($)"].sum()
     }])
     cost_summary = pd.concat([cost_summary, total_row], ignore_index=True)
 
     # --- Total Time Spent per Project Stage (ignoring personnel allocation) ---
     total_time_summary = pd.DataFrame({"Stage": project_stages})
 
-    for scenario in ["BAU_1", "BAU_2", "Proposed_Tool"]:
+    for scenario in ["BAU", "Proposed_Tool"]:
         durations = []
         df_scenario = st.session_state.get(f"df_{scenario}", pd.DataFrame())
         for stage in project_stages:
@@ -1009,17 +1033,14 @@ elif page == "Project-Stage Efficiency Gains":
         total_time_summary[f"{scenario.replace('_',' ')} Duration (weeks)"] = durations
 
     # Compute time saved (positive = time saved)
-    total_time_summary["Time Saved vs BAU1 (weeks)"] = total_time_summary["BAU 1 Duration (weeks)"] - total_time_summary["Proposed Tool Duration (weeks)"]
-    total_time_summary["Time Saved vs BAU2 (weeks)"] = total_time_summary["BAU 2 Duration (weeks)"] - total_time_summary["Proposed Tool Duration (weeks)"]
+    total_time_summary["Time Saved vs BAU (weeks)"] = total_time_summary["BAU Duration (weeks)"] - total_time_summary["Proposed Tool Duration (weeks)"]
 
     # Add TOTAL row
     total_time_row = pd.DataFrame([{
         "Stage": "TOTAL",
-        "BAU 1 Duration (weeks)": total_time_summary["BAU 1 Duration (weeks)"].sum(),
-        "BAU 2 Duration (weeks)": total_time_summary["BAU 2 Duration (weeks)"].sum(),
+        "BAU Duration (weeks)": total_time_summary["BAU Duration (weeks)"].sum(),
         "Proposed Tool Duration (weeks)": total_time_summary["Proposed Tool Duration (weeks)"].sum(),
-        "Time Saved vs BAU1 (weeks)": total_time_summary["Time Saved vs BAU1 (weeks)"].sum(),
-        "Time Saved vs BAU2 (weeks)": total_time_summary["Time Saved vs BAU2 (weeks)"].sum()
+        "Time Saved vs BAU (weeks)": total_time_summary["Time Saved vs BAU (weeks)"].sum()
     }])
     total_time_summary = pd.concat([total_time_summary, total_time_row], ignore_index=True)
 
@@ -1033,8 +1054,8 @@ elif page == "Project-Stage Efficiency Gains":
 
     st.info(""" 
             ### Active Person-Hours by Project Stage ###
-            - This table presents the estimated total person-hours required for each stage of the research project across the **BAU 1, BAU 2,** and **Proposed Tool** scenarios. 
-            - **Time Saved** = hours saved by the Proposed Tool compared to each BAU scenario (positive = less time required). 
+            - This table presents the estimated total person-hours required for each stage of the research project across the **BAU** and **Proposed Tool** scenarios. 
+            - **Time Saved** = hours saved by the Proposed Tool compared to BAU scenario (positive = less time required). 
             - All durations assume **40 working hours per week**. 
             - The **TOTAL** row provides the overall project-level summary. 
             """)
@@ -1043,9 +1064,9 @@ elif page == "Project-Stage Efficiency Gains":
 
     st.info(""" 
             ### Cost by Project Stage ###
-            - This table presents the estimated total personnel cost required for each stage of the research project as well as the non-personnel / infrastructure cost across the **BAU 1, BAU 2,** and **Proposed Tool** scenarios. 
+            - This table presents the estimated total personnel cost required for each stage of the research project as well as the non-personnel / infrastructure cost across the **BAU** and **Proposed Tool** scenarios. 
             - Personnel-cost is based on the % Active Time spent.
-            - **Cost Saved** = hours saved by the Proposed Tool compared to each BAU scenario (positive = less cost required). 
+            - **Cost Saved** = hours saved by the Proposed Tool compared to BAU scenario (positive = less cost required). 
             - **Infrastructure** represents the total hardware / software cost (i.e. non personnel cost for the entire project)
             - The **TOTAL** row provides the overall project-level summary. 
             """)
@@ -1065,7 +1086,7 @@ elif page == "Personnel Efficiency Gains":
 
     # --- Person-Hours Table ---
     time_summary = pd.DataFrame({"Role": roles})
-    for scenario_name, df_scenario in zip(["BAU 1", "BAU 2", "Proposed Tool"], [df_bau1, df_bau2, df_tool]):
+    for scenario_name, df_scenario in zip(["BAU", "Proposed Tool"], [df_bau1, df_bau2, df_tool]):
         hours_list = []
         for role in roles:
             role_rows = df_scenario[df_scenario["Role"] == role] if not df_scenario.empty else pd.DataFrame()
@@ -1077,23 +1098,19 @@ elif page == "Personnel Efficiency Gains":
         time_summary[f"{scenario_name} (hrs)"] = hours_list
 
     # Compute time saved
-    time_summary["Time Saved vs BAU1 (hrs)"] = time_summary["BAU 1 (hrs)"] - time_summary["Proposed Tool (hrs)"]
-    time_summary["Time Saved vs BAU2 (hrs)"] = time_summary["BAU 2 (hrs)"] - time_summary["Proposed Tool (hrs)"]
-
+    time_summary["Time Saved vs BAU (hrs)"] = time_summary["BAU (hrs)"] - time_summary["Proposed Tool (hrs)"]
     # Add TOTAL row
     total_time_row = pd.DataFrame([{
         "Role": "TOTAL",
-        "BAU 1 (hrs)": time_summary["BAU 1 (hrs)"].sum(),
-        "BAU 2 (hrs)": time_summary["BAU 2 (hrs)"].sum(),
+        "BAU (hrs)": time_summary["BAU (hrs)"].sum(),
         "Proposed Tool (hrs)": time_summary["Proposed Tool (hrs)"].sum(),
-        "Time Saved vs BAU1 (hrs)": time_summary["Time Saved vs BAU1 (hrs)"].sum(),
-        "Time Saved vs BAU2 (hrs)": time_summary["Time Saved vs BAU2 (hrs)"].sum()
+        "Time Saved vs BAU (hrs)": time_summary["Time Saved vs BAU (hrs)"].sum()
     }])
     time_summary = pd.concat([time_summary, total_time_row], ignore_index=True)
 
     # --- Cost Table ---
     cost_summary = pd.DataFrame({"Role": roles})
-    for scenario_name, df_scenario in zip(["BAU 1", "BAU 2", "Proposed Tool"], [df_bau1, df_bau2, df_tool]):
+    for scenario_name, df_scenario in zip(["BAU", "Proposed Tool"], [df_bau1, df_bau2, df_tool]):
         cost_list = []
         for role in roles:
             role_rows = df_scenario[df_scenario["Role"] == role] if not df_scenario.empty else pd.DataFrame()
@@ -1107,24 +1124,21 @@ elif page == "Personnel Efficiency Gains":
         cost_summary[f"{scenario_name} Cost ($)"] = cost_list
 
     # Compute cost saved
-    cost_summary["Cost Saved vs BAU1 ($)"] = cost_summary["BAU 1 Cost ($)"] - cost_summary["Proposed Tool Cost ($)"]
-    cost_summary["Cost Saved vs BAU2 ($)"] = cost_summary["BAU 2 Cost ($)"] - cost_summary["Proposed Tool Cost ($)"]
+    cost_summary["Cost Saved vs BAU ($)"] = cost_summary["BAU Cost ($)"] - cost_summary["Proposed Tool Cost ($)"]
 
     # Add TOTAL row
     total_cost_row = pd.DataFrame([{
         "Role": "TOTAL",
-        "BAU 1 Cost ($)": cost_summary["BAU 1 Cost ($)"].sum(),
-        "BAU 2 Cost ($)": cost_summary["BAU 2 Cost ($)"].sum(),
+        "BAU Cost ($)": cost_summary["BAU Cost ($)"].sum(),
         "Proposed Tool Cost ($)": cost_summary["Proposed Tool Cost ($)"].sum(),
-        "Cost Saved vs BAU1 ($)": cost_summary["Cost Saved vs BAU1 ($)"].sum(),
-        "Cost Saved vs BAU2 ($)": cost_summary["Cost Saved vs BAU2 ($)"].sum()
+        "Cost Saved vs BAU ($)": cost_summary["Cost Saved vs BAU ($)"].sum()
     }])
     cost_summary = pd.concat([cost_summary, total_cost_row], ignore_index=True)
 
     # --- Display ---
     st.info("""
         ### Active Person-Hours by Role
-        - Shows total active hours per role across **BAU 1, BAU 2,** and **Proposed Tool** scenarios.
+        - Shows total active hours per role across **BAU** and **Proposed Tool** scenarios.
         - **Time Saved** = hours saved by Proposed Tool compared to each BAU scenario (positive = less time required).
         - All durations assume 40 working hours per week.
         - The **TOTAL** row provides the overall summary across all roles.
@@ -1133,7 +1147,7 @@ elif page == "Personnel Efficiency Gains":
 
     st.info("""
         ### Personnel Cost by Role
-        - Shows total personnel cost per role across **BAU 1, BAU 2,** and **Proposed Tool** scenarios.
+        - Shows total personnel cost per role across **BAU** and **Proposed Tool** scenarios.
         - Personnel-cost is based on the % Active Time spent.
         - Cost Saved = hours saved by the Proposed Tool compared to each BAU scenario (positive = less cost required).
         - The TOTAL row provides the overall project-level summary.
@@ -1142,11 +1156,16 @@ elif page == "Personnel Efficiency Gains":
 
 elif page == "ROI":
     st.header("📈 Return on Investment (ROI) Analysis")
-
+    st.markdown("#### Impact per Study")
+    st.info(
+        "Impact per Study is defined from the ROI Parameters as:\n\n"
+        "***Discovery Rate*** × ***Per-student improvement in long-term economic opportunity*** × ***Total Reach*** "
+        "(i.e., number of students impacted by the research study)"
+    )
     # Retrieve total project durations in weeks
     total_time_summary = st.session_state.get("df_BAU_1", pd.DataFrame())
     durations_weeks = {}
-    for scenario in ["BAU_1", "BAU_2", "Proposed_Tool"]:
+    for scenario in ["BAU", "Proposed_Tool"]:
         df_scenario = st.session_state.get(f"df_{scenario}", pd.DataFrame())
         total_weeks = 0
         if not df_scenario.empty:
@@ -1159,7 +1178,7 @@ elif page == "ROI":
     # Retrieve total costs (personnel + infrastructure)
     cost_summary = st.session_state.get("df_infrastructure_summary", pd.DataFrame())
     total_costs = {}
-    for scenario in ["BAU_1", "BAU_2", "Proposed_Tool"]:
+    for scenario in ["BAU", "Proposed_Tool"]:
         # Sum infrastructure per-study cost
         infra_cost = 0
         if not cost_summary.empty:
@@ -1183,26 +1202,21 @@ elif page == "ROI":
     total_students = roi_params.get("roi_total_students", 0)
 
     impact_per_study = {}
-    for scenario in ["BAU_1", "BAU_2", "Proposed_Tool"]:
+    for scenario in ["BAU", "Proposed_Tool"]:
         impact_per_study[scenario] = per_student_improvement * evidence_rate * total_students
 
     # Build ROI DataFrame
     roi_df = pd.DataFrame({
-        "Scenario": ["BAU 1", "BAU 2", "Proposed Tool"],
-        "Time (months)": [round(durations_months["BAU_1"],1),
-                        round(durations_months["BAU_2"],1),
+        "Scenario": ["BAU", "Proposed Tool"],
+        "Time (months)": [round(durations_months["BAU"],1),
                         round(durations_months["Proposed_Tool"],1)],
-        "Cost ($)": [round(total_costs["BAU_1"],2),
-                    round(total_costs["BAU_2"],2),
+        "Cost ($)": [round(total_costs["BAU"],2),
                     round(total_costs["Proposed_Tool"],2)],
-        "Impact per study ($)": [round(impact_per_study["BAU_1"],2),
-                                round(impact_per_study["BAU_2"],2),
+        "Impact per study ($)": [round(impact_per_study["BAU"],2),
                                 round(impact_per_study["Proposed_Tool"],2)]
     })
 
     st.dataframe(roi_df, use_container_width=True)
-
-    st.subheader("📊 50-Year ROI Projection: BAU 1 vs BAU 2 vs Proposed Tool")
 
     # Retrieve platform parameters
     roi_params = st.session_state.get("roi_parameters", {})
@@ -1214,45 +1228,53 @@ elif page == "ROI":
     total_students = roi_params.get("roi_total_students", 0)
     gates_investment = roi_params.get("roi_investment_gates", 0)
 
-    bau1_time = get_scenario_value("BAU 1", "Time (months)")
-    bau2_time = get_scenario_value("BAU 2", "Time (months)")
+    bau1_time = get_scenario_value("BAU", "Time (months)")
     tool_time = get_scenario_value("Proposed Tool", "Time (months)")
 
-    bau1_cost = get_scenario_value("BAU 1", "Cost ($)")
-    bau2_cost = get_scenario_value("BAU 2", "Cost ($)")
+    bau1_cost = get_scenario_value("BAU", "Cost ($)")
     tool_cost = get_scenario_value("Proposed Tool", "Cost ($)")
 
-    bau1_impact = get_scenario_value("BAU 1", "Impact per study ($)")
-    bau2_impact = get_scenario_value("BAU 2", "Impact per study ($)")
+    bau1_impact = get_scenario_value("BAU", "Impact per study ($)")
     tool_impact = get_scenario_value("Proposed Tool", "Impact per study ($)")
 
     # === User Inputs for Fixed Costs ===
-    st.markdown("#### ⚙️ Adjust Fixed Costs (if desired)")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        fixed_bau1_user = st.number_input("BAU 1 Fixed Cost ($)", value=0)
-    with col2:
-        # BAU 2 fixed = variable cost from BAU 1 to serve X orgs for 1 project
-        default_bau2_fc = bau1_cost * num_orgs_bau1
-        fixed_bau2_user = st.number_input("BAU 2 Fixed Cost ($)", value=default_bau2_fc)
-    with col3:
-        fixed_tool_user = st.number_input("Proposed Tool Fixed Cost ($)", value=gates_investment)
+    st.markdown('---')
+    st.markdown("#### ⚙️ Adjust Fixed Costs (optional)")
 
-    # === Projection Computation ===
+    st.info("""
+    - **Fixed Costs** — These are one-time or upfront expenses that do not change with the number of research studies conducted.  
+    Examples include tool development, software setup, infrastructure installation, and initial onboarding or training.  
+    This cost is **separate** from the operational cost of a research study (i.e., total personnel and infrastructure costs computed from your inputs).
+
+    - **Variable Costs** — These are recurring or scalable expenses that increase with each additional research study.  
+    Examples include data storage, API or tool usage, researcher time, or other per-study fees.  
+    This cost is **derived directly** from the operational cost of the research study.
+    """)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        fixed_bau1_user = st.number_input(
+            "BAU Fixed Cost ($)", 
+            value=0,
+            help='The fixed cost in the Business as Usual (BAU) scenario is set to 0 by default, as it assumes the organization is establishing its research process for the first time. If a custom tool or off-the-shelf solution is being used, it is assumed that each new research study incurs the same setup cost. In reality, however, once initial operations are established, these costs tend to decrease over time. Therefore, you may adjust the fixed cost to better reflect actual long-term efficiencies.')
+    with col2:
+        fixed_tool_user = st.number_input(
+            "Proposed Tool Fixed Cost ($)",
+            value=gates_investment,
+            help="The fixed cost in the Proposed Tool scenario represents the grantee organization's investment in developing or implementing the tool, as this is assumed to be the amount required for initial setup. This value can be adjusted as needed to reflect actual or projected costs.")
+
+    # === Charts ===
+    st.markdown('---')
+    st.markdown("### 📉 Impact per Dollar Over Time")
+
     projection_data = []
 
     # Compute projections for each scenario
-    compute_projection("BAU 1", bau1_time, bau1_cost, bau1_impact, fixed_bau1_user, num_orgs_bau1)
-    compute_projection("BAU 2", bau2_time, bau2_cost, bau2_impact, fixed_bau2_user, num_orgs_bau2)
+    compute_projection("BAU", bau1_time, bau1_cost, bau1_impact, fixed_bau1_user, num_orgs_bau1)
     compute_projection("Proposed Tool", tool_time, tool_cost, tool_impact, fixed_tool_user, num_orgs_proposed)
 
     # Convert to DataFrame
     roi_projection_all = pd.DataFrame(projection_data)
-
-    st.dataframe(roi_projection_all, use_container_width=True)
-
-    # === Charts ===
-    st.markdown("### 📉 Impact per Dollar Over Time")
 
     # Chart 1: Only variable cost for Proposed Tool (no FC)
     df_chart1 = roi_projection_all.copy()
@@ -1280,6 +1302,8 @@ elif page == "ROI":
         markers=True
     )
     st.plotly_chart(fig2, use_container_width=True)
+    st.markdown("##### ROI Data Table")
+    st.dataframe(roi_projection_all, use_container_width=True)
 
 # =========================================================
 #  FIXED NAVIGATION BUTTONS
