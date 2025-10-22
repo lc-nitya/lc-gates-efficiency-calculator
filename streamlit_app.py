@@ -119,10 +119,8 @@ personnel_roles = [p["Role"] for p in st.session_state.personnel_rows]
 
 # --- Project stages ---
 project_stages = [
-    "Data Sharing Agreements & Data User Agreements",
-    "Human Subject Research Approvals",
+    "Data Agreements and Research Approvals",
     "Data Collection & Access or Transfer",
-    "Data Cleaning",
     "Study Design & Infrastructure Setup",
     "Study Implementation and Monitoring",
     "Data Modeling & Analysis",
@@ -141,17 +139,15 @@ def render_activity_section(section_name):
                 st.session_state.project_steps[section_name][stage] = []
 
                 # Stage-specific prefilled steps
-                if stage == 'Data Sharing Agreements & Data User Agreements':
-                    st.session_state.project_steps[section_name][stage] = [{
+                if stage == 'Data Agreements and Research Approvals':
+                    st.session_state.project_steps[section_name][stage] = [
+                        {
                         "id": str(uuid.uuid4()),
                         "Step": "Drafting agreements, review, executing DSAs and DUAs",
                         "Notes": "",
                         "Duration": 0.0,
-                        "Roles": {r: 0.0 for r in personnel_roles}
-                    }]
-                elif stage == 'Human Subject Research Approvals':
-                    st.session_state.project_steps[section_name][stage] = [
-                        {
+                        "Roles": {r: 0.0 for r in personnel_roles}},
+                                                {
                             "id": str(uuid.uuid4()),
                             "Step": "Researchers to complete IRB requirements",
                             "Notes": "",
@@ -165,7 +161,7 @@ def render_activity_section(section_name):
                             "Duration": 0.0,
                             "Roles": {r: 0.0 for r in personnel_roles}
                         }
-                    ]
+                        ]
                 elif stage == 'Data Collection & Access or Transfer':
                     st.session_state.project_steps[section_name][stage] = [
                         {
@@ -183,22 +179,14 @@ def render_activity_section(section_name):
                             "Roles": {r: 0.0 for r in personnel_roles}
                         }
                     ]
-                elif stage == 'Data Cleaning':
-                    st.session_state.project_steps[section_name][stage] = [
-                        {
-                            "id": str(uuid.uuid4()),
-                            "Step": "Data Review or Quality Check, Data Cleaning & Merging",
-                            "Notes": "e.g. Researcher may: Review data to understand format and key fields. Assess & Fix data issues / quality (checking for missing values, duplicates, standardized values, etc.). Merge & validate datasets. District / Education platform may: address any data questions. fix data issues, as required (e.g. if some data is missing)",
-                            "Duration": 0.0,
-                            "Roles": {r: 0.0 for r in personnel_roles}
-                        }
-                    ]
                 elif stage == 'Study Design & Infrastructure Setup':
                     st.session_state.project_steps[section_name][stage] = [
                         {
                             "id": str(uuid.uuid4()),
-                            "Step": "Exploratory Data Analysis to guide Study Design",
-                            "Notes": "e.g. Researcher will compile descriptive and statistical analyses to understand data distributions, possible correlations, run power calculations, determine randomization strategy, etc. in order to guide the model/analysis design.",
+                            "Step": "Data Prep and Exploration",
+                            "Notes": "e.g. "
+                            "Researcher may review, clean, merge and validate datasets. District/Platform may answer data questions and fix issues as needed."
+                            " Researcher will also compile analyses to understand data distributions, run power calculations, determine randomization strategy, etc. to guide study design.",
                             "Duration": 0.0,
                             "Roles": {r: 0.0 for r in personnel_roles}
                         },
@@ -791,12 +779,10 @@ elif page == "Infrastructure Costs":
     st.markdown("---")
 
     st.caption(
-        "Enter the annual **infrastructure costs** (e.g., hardware, software, storage, API usage) for both the Business as Usual and Proposed Tool scenarios. "
-        "These are non-personnel operational costs. Annual costs are used because research organizations typically pay for subscriptions or services on a yearly basis. "
-        "Per-study costs can then be approximated by scaling these annual costs by the number of studies conducted per year. "
-        "Alternatively, if you prefer, you may instead enter the exact costs for the specific research project and set the number of studies per year to 1. "
-        "The cost catgeories listed below are a guiding framework. You may edit/add/delete cost categories, adjust amounts, and add notes as needed."
-        " The estimates represent the **total infrastructure cost** from the perspective of a single end user, i.e., a research organization that the proposed tool supports."
+        "Enter the per-study **infrastructure costs** (e.g., hardware, software, storage, API usage) for both the Business as Usual and Proposed Tool scenarios. "
+        "These are non-personnel operational costs. While research organizations typically pay for subscriptions or services shared across multiple research projects, please provide your best estimate for **per-study costs**. "
+        "The cost categories listed below serve as a guiding framework. You may edit, add, or delete categories, adjust amounts, and add notes as needed. "
+        "The estimates represent the **total infrastructure cost** from the perspective of a single end user — i.e., a research organization supported by the proposed tool."
     )
 
     # --- Initialize with prefilled categories but no costs ---
@@ -804,30 +790,30 @@ elif page == "Infrastructure Costs":
         st.session_state.infrastructure_costs = [
             {
                 "id": str(uuid.uuid4()),
-                "Cost Category (annual costs)": "Integration Costs",
-                "Business as Usual": 0.0,
-                "Proposed Tool": 0.0,
+                "Cost Category": "Integration Costs",
+                "Business as Usual ($)": 0.0,
+                "Proposed Tool ($)": 0.0,
                 "Notes": "e.g. Proposed tool requires API integration with the organization's codebase."
             },
             {
                 "id": str(uuid.uuid4()),
-                "Cost Category (annual costs)": "Software Licenses",
-                "Business as Usual": 0.0,
-                "Proposed Tool": 0.0,
+                "Cost Category": "Software Licenses",
+                "Business as Usual ($)": 0.0,
+                "Proposed Tool ($)": 0.0,
                 "Notes": "e.g. Researchers require Stata for analysis."
             },
             {
                 "id": str(uuid.uuid4()),
-                "Cost Category (annual costs)": "Compute Resources",
-                "Business as Usual": 0.0,
-                "Proposed Tool": 0.0,
+                "Cost Category": "Compute Resources",
+                "Business as Usual ($)": 0.0,
+                "Proposed Tool ($)": 0.0,
                 "Notes": "e.g. Researchers require GPUs for big data analysis."
             },
             {
                 "id": str(uuid.uuid4()),
-                "Cost Category (annual costs)": "Storage",
-                "Business as Usual": 0.0,
-                "Proposed Tool": 0.0,
+                "Cost Category": "Storage",
+                "Business as Usual ($)": 0.0,
+                "Proposed Tool ($)": 0.0,
                 "Notes": "e.g. Researchers require cloud storage for data access."
             }
         ]
@@ -839,22 +825,22 @@ elif page == "Infrastructure Costs":
 
         cols = st.columns([3, 2, 2, 3, 1])
         category = cols[0].text_input(
-            "Cost Category (annual costs)",
-            value=row["Cost Category (annual costs)"],
+            "Cost Category",
+            value=row["Cost Category"],
             key=f"cat_{row['id']}"
         )
         BAU = cols[1].number_input(
-            "Business as Usual",
+            "Business as Usual ($)",
             min_value=0.0,
             step=10.0,
-            value=float(row["Business as Usual"]),
+            value=float(row["Business as Usual ($)"]),
             key=f"bau1_{row['id']}"
         )
         proposed = cols[2].number_input(
-            "Proposed Tool",
+            "Proposed Tool ($)",
             min_value=0.0,
             step=10.0,
-            value=float(row["Proposed Tool"]),
+            value=float(row["Proposed Tool ($)"]),
             key=f"tool_{row['id']}"
         )
         notes = cols[3].text_input(
@@ -870,8 +856,8 @@ elif page == "Infrastructure Costs":
         # Update stored row
         row.update({
             "Cost Category": category,
-            "Business as Usual": BAU,
-            "Proposed Tool": proposed,
+            "Business as Usual ($)": BAU,
+            "Proposed Tool ($)": proposed,
             "Notes": notes
         })
 
@@ -879,9 +865,9 @@ elif page == "Infrastructure Costs":
     if st.button("➕ Add Additional Cost Category"):
         st.session_state.infrastructure_costs.append({
             "id": str(uuid.uuid4()),
-            "Cost Category (annual costs)": "",
-            "Business as Usual": 0.0,
-            "Proposed Tool": 0.0,
+            "Cost Category": "",
+            "Business as Usual ($)": 0.0,
+            "Proposed Tool ($)": 0.0,
             "Notes": ""
         })
         st.rerun()
@@ -889,44 +875,25 @@ elif page == "Infrastructure Costs":
     # --- Convert to DataFrame ---
     df_infra = pd.DataFrame(st.session_state.infrastructure_costs).drop(columns="id")
 
-
-    # --- Studies conducted per year ---
-    st.markdown("---")
-    st.markdown("<h3 style='color:#ECB390;'>Studies per Year</h3>", unsafe_allow_html=True)
-    studies_per_year = st.number_input(
-        "Number of studies conducted per year by an organization",
-        min_value=1.0,
-        step=1.0,
-        value=1.0,
-        format="%.0f",
-        help="Total infrastructure costs are divided by this number to calculate the per-study cost."
-    )
-    st.markdown("---")
-
     # --- Compute totals ---
-    total_bau1 = df_infra["Business as Usual"].sum()
-    total_tool = df_infra["Proposed Tool"].sum()
+    total_bau = df_infra["Business as Usual ($)"].sum()
+    total_tool = df_infra["Proposed Tool ($)"].sum()
 
-    per_study_bau1 = total_bau1 / studies_per_year
-    per_study_tool = total_tool / studies_per_year
-
-    # --- Itemized Preview Table ---
-    st.markdown("### Itemized Infrastructure Costs")
-    st.dataframe(df_infra, use_container_width=True)
-
-    # --- Summary Preview Table ---
-    st.markdown("### Total Annual & Per-Study Infrastructure Costs")
-    summary_df = pd.DataFrame({
-        "Scenario": ["Business as Usual", "Proposed Tool"],
-        "Total Annual Cost": [total_bau1, total_tool],
-        "Per-Study Cost": [per_study_bau1, per_study_tool]
+    # --- Add a Total row ---
+    total_row = pd.DataFrame({
+        "Cost Category": ["Total"],
+        "Business as Usual ($)": [total_bau],
+        "Proposed Tool ($)": [total_tool]
     })
-    st.dataframe(summary_df, use_container_width=True)
 
-    # --- Store DataFrames for later use ---
-    st.session_state.df_infrastructure_costs = df_infra
-    st.session_state.df_infrastructure_summary = summary_df
+    df_combined = pd.concat([df_infra, total_row], ignore_index=True)
 
+    # --- Display combined table ---
+    st.markdown("### Infrastructure Costs Table")
+    st.dataframe(df_combined, use_container_width=True)
+
+    # --- Store DataFrame for later use ---
+    st.session_state.df_infrastructure_costs = df_combined
 # =========================================================
 #  OUTPUT PAGE
 # =========================================================
@@ -993,12 +960,12 @@ elif page == "Project-Stage Efficiency Gains":
         cost_summary[f"{scenario.replace('_',' ')} Cost ($)"] = costs
 
     # --- Add Infrastructure row ---
-    infra_costs = st.session_state.get("df_infrastructure_summary", pd.DataFrame())
+    infra_costs = st.session_state.get("df_infrastructure_costs", pd.DataFrame())
     if not infra_costs.empty:
         infra_row = {
             "Stage": "Infrastructure",
-            "BAU Cost ($)": infra_costs.loc[infra_costs["Scenario"]=="Business as Usual", "Per-Study Cost"].values[0],
-            "Proposed Tool Cost ($)": infra_costs.loc[infra_costs["Scenario"]=="Proposed Tool", "Per-Study Cost"].values[0]
+            "BAU Cost ($)": infra_costs.loc[infra_costs["Cost Category"]=="Total", "Business as Usual ($)"].values[0],
+            "Proposed Tool Cost ($)": infra_costs.loc[infra_costs["Cost Category"]=="Total", "Proposed Tool ($)"].values[0]
         }
         cost_summary = pd.concat([cost_summary, pd.DataFrame([infra_row])], ignore_index=True)
 
@@ -1176,13 +1143,13 @@ elif page == "ROI":
     durations_months = {k: v / 4.345 for k, v in durations_weeks.items()}
 
     # Retrieve total costs (personnel + infrastructure)
-    cost_summary = st.session_state.get("df_infrastructure_summary", pd.DataFrame())
+    cost_summary = st.session_state.get("df_infrastructure_costs", pd.DataFrame())
     total_costs = {}
     for scenario in ["BAU", "Proposed_Tool"]:
         # Sum infrastructure per-study cost
         infra_cost = 0
         if not cost_summary.empty:
-            infra_cost = cost_summary.loc[cost_summary["Scenario"]==scenario.replace("_"," "), "Per-Study Cost"].values[0]
+            infra_cost = cost_summary.loc[cost_summary["Cost Category"]=="Total", scenario.replace("_"," ")].values[0]
         # Add personnel cost
         df_scenario = st.session_state.get(f"df_{scenario}", pd.DataFrame())
         personnel_cost = 0
