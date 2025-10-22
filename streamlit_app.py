@@ -366,19 +366,53 @@ def copy_from_section(source_section, target_section):
     else:
         st.warning(f"⚠️ No data found in {source_section} to copy.")
 
-def compute_projection(scenario_name, time_months, cost_per_study, impact_per_study, fixed_cost, num_orgs, include_fc_in_roi=True):
-    years = list(range(1, 51))
-    for year in years:
+def compute_projection(
+    scenario_name, 
+    time_months, 
+    cost_per_study, 
+    impact_per_study, 
+    fixed_cost, 
+    num_orgs, 
+    num_concurrent_projects=1
+):
+    """
+    Computes a 50-year projection of costs, impact, and ROI for a research scenario.
+
+    Parameters:
+    - scenario_name (str): Name of the scenario (e.g., "Business as Usual", "Proposed Tool").
+    - time_months (float): Duration of a single study in months.
+    - cost_per_study (float): Variable cost per study.
+    - impact_per_study (float): Impact (in $) per study.
+    - fixed_cost (float): Fixed 1-time setup cost for the scenario.
+    - num_orgs (int): Number of organizations conducting studies.
+    - num_concurrent_projects (int, default=1): Number of studies each org runs concurrently.
+
+    Returns:
+    - projection_data (list of dict): List containing annual projections of costs, impact, and ROI.
+    """
+
+    projection_data = []
+    for year in range(1, 51):  # 50-year projection
         total_months = year * 12
-        studies_each_org = math.floor(total_months / time_months) if time_months > 0 else 0
+
+        # Compute number of studies each organization can conduct in this year
+        if time_months > 0:
+            studies_each_org = math.floor(total_months * num_concurrent_projects / time_months)
+        else:
+            studies_each_org = 0  # Avoid division by zero
+
+        # Compute costs
         variable_cost = cost_per_study * studies_each_org * num_orgs
         total_cost = variable_cost + fixed_cost
+
+        # Compute total impact
         impact = impact_per_study * studies_each_org * num_orgs
 
-        # ROI for two perspectives
+        # Compute ROI
         roi_excl_fc = impact / variable_cost if variable_cost > 0 else 0
         roi_incl_fc = impact / total_cost if total_cost > 0 else 0
 
+        # Append data for this year
         projection_data.append({
             "Scenario": scenario_name,
             "Year": year,
@@ -390,6 +424,8 @@ def compute_projection(scenario_name, time_months, cost_per_study, impact_per_st
             "Impact per $ (Variable only)": roi_excl_fc,
             "Impact per $ (Total cost)": roi_incl_fc
         })
+
+    return projection_data
 
 # Extract scenario values from ROI summary
 def get_scenario_value(scenario, col):
@@ -709,7 +745,7 @@ elif page == "ROI Parameters":
         "computed_improvement": computed_improvement,
         "evidence_rate": evidence_rate,
         "total_students": total_students,
-        "total_investment_k": total_investment,
+        "total_investment": total_investment,
         "orgs_proposed": orgs_proposed,
         "orgs_bau1": orgs_bau1,
         "studies_proposed": studies_proposed
@@ -1168,8 +1204,8 @@ elif page == "ROI":
     # Compute Impact per study
     roi_params = st.session_state.get("roi_parameters", {})
     per_student_improvement = roi_params.get("computed_improvement", 0)
-    evidence_rate = roi_params.get("roi_evidence_rate", 0)/100
-    total_students = roi_params.get("roi_total_students", 0)
+    evidence_rate = roi_params.get("evidence_rate", 0)/100
+    total_students = roi_params.get("total_students", 0)
 
     impact_per_study = {}
     for scenario in ["BAU", "Proposed_Tool"]:
@@ -1190,13 +1226,13 @@ elif page == "ROI":
 
     # Retrieve platform parameters
     roi_params = st.session_state.get("roi_parameters", {})
-    num_orgs_bau1 = roi_params.get("roi_orgs_bau1", 1)
-    num_orgs_bau2 = roi_params.get("roi_orgs_bau2", 1)
-    num_orgs_proposed = roi_params.get("roi_orgs_proposed", 1)
+    num_orgs_bau1 = roi_params.get("orgs_bau1", 0)
+    num_orgs_proposed = roi_params.get("orgs_proposed", 0)
     per_student_improvement = roi_params.get("computed_improvement", 0)
-    evidence_rate = roi_params.get("roi_evidence_rate", 0)/100
-    total_students = roi_params.get("roi_total_students", 0)
-    gates_investment = roi_params.get("roi_investment_gates", 0)
+    evidence_rate = roi_params.get("evidence_rate", 0)/100
+    total_students = roi_params.get("total_students", 0)
+    total_investment = roi_params.get("total_investment", 0)
+    num_concurrent_projects = roi_params.get("studies_proposed", 0)
 
     bau1_time = get_scenario_value("BAU", "Time (months)")
     tool_time = get_scenario_value("Proposed Tool", "Time (months)")
@@ -1230,7 +1266,7 @@ elif page == "ROI":
     with col2:
         fixed_tool_user = st.number_input(
             "Proposed Tool Fixed Cost ($)",
-            value=gates_investment,
+            value=total_investment,
             help="The fixed cost in the Proposed Tool scenario represents the grantee organization's investment in developing or implementing the tool, as this is assumed to be the amount required for initial setup. This value can be adjusted as needed to reflect actual or projected costs.")
 
     # === Charts ===
@@ -1240,8 +1276,8 @@ elif page == "ROI":
     projection_data = []
 
     # Compute projections for each scenario
-    compute_projection("BAU", bau1_time, bau1_cost, bau1_impact, fixed_bau1_user, num_orgs_bau1)
-    compute_projection("Proposed Tool", tool_time, tool_cost, tool_impact, fixed_tool_user, num_orgs_proposed)
+    compute_projection("BAU", bau1_time, bau1_cost, bau1_impact, fixed_bau1_user, num_orgs_bau1, num_concurrent_projects)
+    compute_projection("Proposed Tool", tool_time, tool_cost, tool_impact, fixed_tool_user, num_orgs_proposed, num_concurrent_projects)
 
     # Convert to DataFrame
     roi_projection_all = pd.DataFrame(projection_data)
@@ -1251,6 +1287,9 @@ elif page == "ROI":
     df_chart1.loc[df_chart1["Scenario"] == "Proposed Tool", "Impact per $ (Variable only)"] = \
         df_chart1.loc[df_chart1["Scenario"] == "Proposed Tool", "Impact ($)"] / \
         df_chart1.loc[df_chart1["Scenario"] == "Proposed Tool", "Variable Cost ($)"]
+
+    df_chart1.loc[df_chart1["Scenario"] == "BAU", "Impact per $ (Variable only)"] = \
+        df_chart1.loc[df_chart1["Scenario"] == "BAU", "Impact per $ (Total cost)"]
 
     fig1 = px.line(
         df_chart1,
