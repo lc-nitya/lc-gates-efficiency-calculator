@@ -1149,7 +1149,10 @@ elif page == "ROI":
         # Sum infrastructure per-study cost
         infra_cost = 0
         if not cost_summary.empty:
-            infra_cost = cost_summary.loc[cost_summary["Cost Category"]=="Total", scenario.replace("_"," ")].values[0]
+            if scenario == 'BAU':
+                infra_cost = cost_summary.loc[cost_summary["Cost Category"]=="Total", "Business as Usual ($)"].values[0]
+            else:
+                 infra_cost = cost_summary.loc[cost_summary["Cost Category"]=="Total", "Proposed Tool ($)"].values[0]
         # Add personnel cost
         df_scenario = st.session_state.get(f"df_{scenario}", pd.DataFrame())
         personnel_cost = 0
