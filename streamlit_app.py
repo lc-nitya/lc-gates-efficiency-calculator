@@ -1276,23 +1276,14 @@ elif page == "ROI":
     projection_data = []
 
     # Compute projections for each scenario
-    compute_projection("BAU", bau1_time, bau1_cost, bau1_impact, fixed_bau1_user, num_orgs_bau1, num_concurrent_projects)
-    compute_projection("Proposed Tool", tool_time, tool_cost, tool_impact, fixed_tool_user, num_orgs_proposed, num_concurrent_projects)
+    projection_data_bau1 = compute_projection("BAU", bau1_time, bau1_cost, bau1_impact, fixed_bau1_user, num_orgs_bau1, num_concurrent_projects)
+    projection_data_pt = compute_projection("Proposed Tool", tool_time, tool_cost, tool_impact, fixed_tool_user, num_orgs_proposed, num_concurrent_projects)
 
     # Convert to DataFrame
-    roi_projection_all = pd.DataFrame(projection_data)
-
-    # Chart 1: Only variable cost for Proposed Tool (no FC)
-    df_chart1 = roi_projection_all.copy()
-    df_chart1.loc[df_chart1["Scenario"] == "Proposed Tool", "Impact per $ (Variable only)"] = \
-        df_chart1.loc[df_chart1["Scenario"] == "Proposed Tool", "Impact ($)"] / \
-        df_chart1.loc[df_chart1["Scenario"] == "Proposed Tool", "Variable Cost ($)"]
-
-    df_chart1.loc[df_chart1["Scenario"] == "BAU", "Impact per $ (Variable only)"] = \
-        df_chart1.loc[df_chart1["Scenario"] == "BAU", "Impact per $ (Total cost)"]
+    roi_projection_all = pd.DataFrame(projection_data_bau1)
 
     fig1 = px.line(
-        df_chart1,
+        roi_projection_all,
         x="Year",
         y="Impact per $ (Variable only)",
         color="Scenario",
@@ -1310,6 +1301,7 @@ elif page == "ROI":
         title="Impact per Dollar (Including Fixed + Variable Costs)",
         markers=True
     )
+
     st.plotly_chart(fig2, use_container_width=True)
     st.markdown("##### ROI Data Table")
     st.dataframe(roi_projection_all, use_container_width=True)
