@@ -6,7 +6,7 @@ import plotly.express as px
 
 # --- Page configuration ---
 st.set_page_config(
-    page_title="ROI and Cost Analysis Dashboard",
+    page_title="Efficiency Gains Calculator and Social ROI Dashboard",
     layout="wide",
     initial_sidebar_state="expanded"  # Keep sidebar open
 )
@@ -17,13 +17,13 @@ PAGE_GROUPS = {
     "Inputs": {
         "Personnel Costs": [],
         "Infrastructure Costs": [],
-        "ROI Parameters": [],
+        "Social ROI Parameters": [],
         "Project Activities": ["Business as Usual", "Proposed Tool"],
     },
     "Outputs": {
         "Project-Stage Efficiency Gains": [],
         "Personnel Efficiency Gains": [],
-        "ROI": []
+        "Social ROI": []
     }
 }
 
@@ -32,12 +32,12 @@ PAGES = [
     "Instructions",
     "Personnel Costs",
     "Infrastructure Costs",
-    "ROI Parameters",
+    "Social ROI Parameters",
     "Business as Usual",
     "Proposed Tool",
     "Project-Stage Efficiency Gains",
     "Personnel Efficiency Gains",
-    "ROI"
+    "Social ROI"
 ]
 
 # --- Initialize session state ---
@@ -436,7 +436,7 @@ def get_scenario_value(scenario, col):
 
 
 # --- Main Page ---
-st.title("ROI and Cost Analysis Dashboard")
+st.title("Efficiency Gains Calculator and Social ROI Dashboard")
 page = st.session_state.current_page
 
 
@@ -452,17 +452,74 @@ page = st.session_state.current_page
 if page == "Instructions":
     st.info(""" 
             ### What is the purpose of this tool? ###
-            This tool was designed to help ed-tech non-profits and grantee organizations measure the value and impact of investing in building tools to support research on their platforms. It estimates potential efficiency gains, cost savings, and return on investment (ROI) from developing tools such as integrated data systems, scalable experimentation environments, and automated analysis solutions.
+            This tool was originally developed to help the Gates Foundation benchmark efficiency gains from its research and development (R&D) infrastructure investment portfolio. These investments aimed to make education research faster, more cost-effective and more scalable. 
             
-            **Goals**
-            - Establish a standardized framework for calculating efficiency gains across organizations.
-            - Offer data-driven comparisons between current research processes and those improved by the proposed tool.
-            - Provide clear, evidence-based insights to help both funders and non-profits understand the ROI and long-term impact of their investments.
+            This tool presents a framework to estimate potential efficiency gains–defined as time and cost savings–and the broader social return on investment (ROI) from conducting research more efficiently. By quantifying how infrastructure accelerates research, the tool helps illustrate the value of building systems that allow researchers to test more ideas, more often. This framework can be used by funders, investors, researchers and ed tech organizations seeking to quantify and communicate the efficiency gains created by their own tools or infrastructure.  
+
+            #### Goals ####
+            
+            **This tool was developed to provide a consistent, evidence-based framework for understanding how investments in R&D.**
+            - **Establish a standardized framework** for calculating efficiency gains across organizations.
+            - **Enable data-driven comparisons** between current research processes and those improved by the proposed or new R&D infrastructure..
+            - **Generate  clear, evidence-based insights** to help both funders, investors and organizations understand the ROI and long-term impact of their investments.
+            
+            We believe this tool can be useful for many kinds of organizations — philanthropies, investors, and tech organizations (both for-profit and nonprofit) — helping them better understand, amplify, and communicate the impact of their work.
             """)
-    
 
     st.markdown("---")
-    st.markdown("## ⚙️ Instructions")
+    st.markdown("## 🧰   Example Use Cases")
+    st.markdown("---")
+
+    st.markdown("""
+    1. **Foundation Program Officer** - If you're a program officer looking to measure the long-term social returns of your investments — say, in improving middle school math outcomes — this tool can help you predict those returns with evidence. You can also share the link with your portfolio partners to collect data on cost and time savings, as well as overall ROI.
+    2. **Impact-Driven Organization** - If you're a founder or strategist wondering whether investing in a new technology will actually save time and money, the Efficiency Gains Calculator can show you the data. It even breaks down where those savings happen — across different research phases or team roles — so you can see exactly where the biggest gains are. You can edit or replace different research phases with stages that are relevant for your use case. 
+    3. **EdTech Founder** - If you're building an education-focused product or intervention, this tool can give you evidence to strengthen your fundraising case. It helps you estimate the potential long-term economic benefits your solution could create.
+    4. **Education Researcher** - If you're a researcher proposing new technology to improve education R&D, you can use this tool to quickly see how your idea might change current processes — in terms of time, cost, and social returns. It provides a fast, standardized way to translate innovation into measurable outcomes. 
+    5. **Team Leader or Project Manager** - If you're managing a research or product team, the calculator can also be used to model how changes in personnel impact efficiency. For example, adding data engineers or research assistants may reduce bottlenecks in setup and analysis, helping you test whether increasing personnel capacity leads to greater overall time and cost savings. """)
+
+    st.markdown("---")
+    st.markdown("## ⚙️ Our Approach")
+    st.markdown("---")
+
+    st.subheader("Efficiency Gains Calculator")
+    st.markdown("""
+    ***Efficiency*** is defined as the time and cost required to generate high-quality evidence about what works. This calculator applies the Ingredient Method (Levin et al, 2017), a cost analysis approach that breaks down research activities into their core inputs, or “ingredients”, such as personnel and infrastructure. 
+    To use the framework, outline the key research activities involved at different stages of your process (e.g. study design, implementation, analysis) and estimate the time and cost associated with each stage. Then, compare how those activities look under two conditions:
+    
+    - **Business-as-Usual (BAU)**: How research is conducted today, without the new tool or infrastructure. 
+    - **Proposed Tool or Intervention**: How research is conducted after adopting your new infrastructure, tool or process. 
+    
+    The calculator aggregates these inputs to estimate time and cost savings across stages, roles and activities. 
+    
+    *Note*: It's possible that you find estimating the exact time challenging - please note this is an exercise in estimation and generalization, not precision. Even approximate estimates provide valuable insight into where efficiency gains occur. It might be helpful to make explicit assumptions for your before and after inputs. Please remember thoughtful approximations are better than blanks.
+    """)
+
+    st.subheader("Social ROI (Return on Investment) Calculator")
+
+    st.markdown("""
+    This section presents a framework for estimating the Social Return on Investment (ROI) 
+    from R&D infrastructure in education. We link the social benefits of faster, cheaper research 
+    to the impact of studies that show gains in middle school math performance.
+    
+    **Key Metrics**
+    - **Typical Effect Sizes**: Median impacts in math range from 0.04 to 0.09 SD, with a median of 0.12 SD (Kraft, 2019).
+    - **Long-term Earnings Impact**: A 0.5 SD gain in math scores during middle school increases adult earnings by 3.5% 
+    (approx \$1,200 per year in 2018, Urban Institute, 2024). A 0.12 SD gain translates to \$288 per year in additional earnings per student at age 30. These effects are similar across race and ethnicity.
+    - **Discovery Rate**: According to the Good Science Project we only have about a 10% success rate in identifying effective interventions.
+    
+    **ROI Calculation**
+    ROI is based on the number of studies, the probability of positive findings (discovery rate), and the observed impact on math scores and future earnings, scaled by the number of students using the platform through which research findings are implemented.
+    
+    **Notes on returns**
+    - **Scalability drives ROI**: In our ROI framework, returns from R&D infrastructure depend on translating discoveries into implementation. As a reference point for scale, use the number of students/users you think would be impacted by your product/intervention. This can be the number of users who use your product/intervention. 
+    - **Sequential studies**: In our framework, we assume that only one study is conducted at a time across all scenarios i.e. business-as-usual and under the proposed tool or infrastructure. This assumption is made solely to keep the model conservative and straightforward, allowing us to estimate the minimum ROI that could be observed from these investments. 
+    - **Fixed cost**: Fixed cost is equal to the initial investment of building a tool/infrastructure. 
+    - **Variable cost**: This is the cost associated to different research stages under the new proposed tool/infrastructure
+    - **Cost calculation**: Costs include both completed and in-progress studies
+    """)
+
+    st.markdown("---")
+    st.markdown("## 📝️  Instructions")
     st.markdown("---")
 
     st.subheader("Before you begin")
@@ -474,23 +531,29 @@ if page == "Instructions":
     - Finally, think about which steps in the research process - and which roles involved - your proposed tool helps make more efficient, and how it does so. Consider the specific challenges your tool aims to solve, such as reducing manual effort, improving data accessibility, streamlining collaboration, or accelerating analysis and reporting.
     - This tool guides you through the process by comparing how a research project operates today (**Business as Usual** Scenario) versus how it would function with the tool in place (**Proposed Tool** Scenario).""")
 
-    # st.subheader("▶️ Tutorial Video")
-    # st.video("https://www.youtube.com/watch?v=_4kHxtiuML0")  # replace with your link
-
     st.subheader("Steps")
     st.markdown("""
     1. **Use the Sidebar** to navigate between pages.  
     2. **Enter the Input Data**
         - **Personnel Costs**: Specify the roles/personnel and salaries involved in conducting the research project
-        - **Infrastructure Costs**: Specify the non-personnel cost (e.g. hardware, software, storage, API usage) required to conduct the research project in both **Business as Usual** and **Proposed Tool** scenarios.
-        - **ROI Parameters**: Fill in the relevant metrics to conduct an ROI analysis for both scenarios (e.g. Number of research organizations supported concurrently, Total investment by grantees, Estimated impact of a single research project)
+        - **Infrastructure Costs**: Specify the non-personnel cost (e.g. hardware, software, storage, API usage) required 
+        to conduct the research project in both **Business as Usual** and **Proposed Tool** scenarios.
+        - **Social ROI Parameters**: Fill in the relevant metrics to conduct an ROI analysis for both scenarios (e.g. Number of 
+        research organizations supported concurrently, Total investment by grantees, Estimated impact of a single research project)
     3. **Project Activities**
-        - **Business as Usual**: Consider how the research project would run **without** the proposed tool. For each stage of the project, describe the steps involved and estimate the total time and personnel effort required. If a stage doesn't apply, you can leave it blank.
-        - **Proposed Tool**: Consider how the research project would run **with** the proposed tool. For each stage of the project, describe the steps involved and estimate the total time and personnel effort required. If a stage doesn't apply, you can leave it blank. To simplify, you can **copy estimates from the Business as Usual scenario** and make edits only for the stages where the proposed tool is expected to change time or personnel effort.
+        - **Business as Usual**: Consider how the research project would run **without** the proposed tool. 
+        For each stage of the project, describe the steps involved and estimate the total time and personnel effort required. 
+        If a stage doesn't apply, you can leave it blank.
+        - **Proposed Tool**: Consider how the research project would run **with** the proposed tool. 
+        For each stage of the project, describe the steps involved and estimate the total time and personnel effort required. 
+        If a stage doesn't apply, you can leave it blank. To simplify, you can **copy estimates from the Business as Usual scenario** and make edits only for the stages where the proposed tool is expected to change time or personnel effort.
     4. **View Outputs**
-        - **Project-Stage Efficiency Gains**: Time and cost savings for a single research project using the proposed tool, broken down by research project stage. These values are automatically calculated based on input data.
-        - **Personnel Efficiency Gains**:  Time and cost savings for a single research project using the proposed tool, broken down by personnel/roles involved. These values are automatically calculated based on input data.
-        - **ROI**: Return on investment for grantee organizations, scaled by the estimated number of organizations supported in the Business as Usual vs. Proposed Tool scenarios.
+        - **Project-Stage Efficiency Gains**: Time and cost savings for a single research project using the proposed tool, 
+        broken down by research project stage. These values are automatically calculated based on input data.
+        - **Personnel Efficiency Gains**:  Time and cost savings for a single research project using the proposed tool, 
+        broken down by personnel/roles involved. These values are automatically calculated based on input data.
+        - **Social ROI**: Return on investment for grantee organizations, scaled by the estimated number of 
+        organizations supported in the Business as Usual vs. Proposed Tool scenarios.
     5. Use **Next** and **Back** buttons for step-wise navigation.
     """)
 
@@ -595,14 +658,13 @@ elif page == "Proposed Tool":
 # =========================================================
 #  ROI PARAMETERS PAGE
 # =========================================================
-elif page == "ROI Parameters":
+elif page == "Social ROI Parameters":
     st.markdown("---")
-    st.header("📈 ROI Parameters")
+    st.header("📈 Social ROI Parameters")
     st.markdown("---")
 
     # --- Median Impact on Learning Outcomes ---
     st.markdown("<h3 style='color:#ECB390;'>Estimated Impact of Research Project</h3>", unsafe_allow_html=True)
-
 
     # --- Primary Outcome ---
     col1, col2 = st.columns([3, 2])
@@ -620,8 +682,14 @@ elif page == "ROI Parameters":
             step=0.01,
             format="%.2f",
             key="roi_learning_sd",
-            help='Specify estimated median impact in standard deviations. Cross-reference relevant literature.'
+            help='Specify estimated median impact in standard deviations. See info below for typical ranges.'
         )
+
+    st.caption("""
+    **Note on Typical Impact / Effect Sizes:**  
+    Median impacts in math range from 0.04 to 0.09 SD, with a median of 0.12 SD (Kraft, 2019).  
+    This number is only a reference point. You can adjust the impact size per the actual results of your research studies.
+    """)
 
     # Add spacing
     st.write("")
@@ -654,6 +722,14 @@ elif page == "ROI Parameters":
     st.number_input("Per-student improvement in long-term economic opportunity (in $)", value=computed_improvement,
                     disabled=True)
 
+    st.caption("""
+    **Note on Long-term Economic Opportunity (or Earnings Impact):**  
+    A 0.5 SD gain in math scores during middle school increases adult earnings by 3.5% (approx. \$1,200 per year in 2018, Urban Institute, 2024).
+    A 0.12 SD gain (i.e. median impact) translates to \$288 per year in additional earnings per student at age 30.
+    These effects are similar across race and ethnicity. 
+    
+    You can adjust the above number for inflation using this link: https://www.bls.gov/data/inflation_calculator.htm """)
+    
     # --- Evidence Generation ---
     st.markdown("<h3 style='color:#ECB390;'>Discovery Rate</h3>", unsafe_allow_html=True)
     evidence_rate = st.number_input(
@@ -667,12 +743,15 @@ elif page == "ROI Parameters":
         help="The estimated probability that a research project will detect measurable impact in the primary outcome"
     )
 
+    st.caption('**Note on Discovery Rate**: According to the Good Science Project we only have about a 10% success rate in identifying effective interventions.')
+
     # --- Research Study Reach & Investment ---
     st.markdown("<h3 style='color:#ECB390;'>Reach and Impact</h3>", unsafe_allow_html=True)
+    st.caption("You can explore different scenarios by adjusting the inputs based on your assumptions.")
     col1, col2 = st.columns(2)
     with col1:
         total_students = st.number_input(
-            "Total reach of the research study (number of individuals impacted).",
+            "Total reach of the research study (# individuals impacted).",
             min_value=1,
             step=1,
             key="roi_total_students",
@@ -699,10 +778,13 @@ elif page == "ROI Parameters":
             value=1,
             key="roi_orgs_bau1",
             help=(
-                "Specify the number of organizations that can use the solution in the Business as Usual scenario. "
-                "The total number of concurrent projects depends on:\n"
-                "- The number of organizations using the solution (BAU or proposed tool).\n"
-                "- The number of projects each organization can run concurrently."
+                """
+                Specify the number of organizations that can use the solution in the Business as Usual scenario.
+                Only relevant when the tool or infrastructure impacts more than one organization; otherwise, the default is 1.
+                
+                The total number of concurrent projects depends on:
+                - The number of organizations using the solution (BAU or proposed tool).
+                - The number of projects each organization can run concurrently."""
             )
         )
 
@@ -714,10 +796,13 @@ elif page == "ROI Parameters":
             value=1,
             key="roi_orgs_proposed",
             help=(
-                "Specify the number of organizations that can use the solution in the Proposed Tool scenario. "
-                "The total number of concurrent projects depends on:\n"
-                "- The number of organizations using the solution (BAU or proposed tool).\n"
-                "- The number of projects each organization can run concurrently."
+                """
+                Specify the number of organizations that can use the solution in the Proposed Tool scenario.
+                Only relevant when the tool or infrastructure impacts more than one organization; otherwise, the default is 1.
+
+                The total number of concurrent projects depends on:
+                - The number of organizations using the solution (BAU or proposed tool).
+                - The number of projects each organization can run concurrently."""
             )
         )
 
@@ -728,11 +813,14 @@ elif page == "ROI Parameters":
             value=1,
             step=1,
             key="roi_studies_proposed",
-            help=(
-                "Specify how many research studies each organization can run at the same time using the solution. "
-                "The total number of concurrent studies depends on:\n"
-                "- The number of organizations using the solution (BAU or proposed tool).\n"
-                "- The number of studies each organization can run concurrently."
+            help = (
+                """
+                Specify how many research studies each organization can run at the same time using the solution.
+                The default value of 1 is used to keep the model conservative and straightforward, providing an estimate of the minimum ROI.
+    
+                The total number of concurrent projects depends on:
+                - The number of organizations using the solution (BAU or proposed tool).
+                - The number of projects each organization can run concurrently."""
             )
         )
 
@@ -1157,11 +1245,11 @@ elif page == "Personnel Efficiency Gains":
     """)
     st.dataframe(cost_summary, use_container_width=True)
 
-elif page == "ROI":
-    st.header("📈 Return on Investment (ROI) Analysis")
+elif page == "Social ROI":
+    st.header("📈 Social Return on Investment (ROI) Analysis")
     st.markdown("#### Impact per Study")
     st.info(
-        "Impact per Study is defined from the ROI Parameters as:\n\n"
+        "Impact per Study is defined from the Social ROI Parameters as:\n\n"
         "***Discovery Rate*** × ***Per-student improvement in long-term economic opportunity*** × ***Total Reach*** "
         "(i.e., number of students impacted by the research study)"
     )
@@ -1305,7 +1393,7 @@ elif page == "ROI":
     )
 
     st.plotly_chart(fig2, use_container_width=True)
-    st.markdown("##### ROI Data Table")
+    st.markdown("##### Social ROI Data Table")
     st.dataframe(roi_projection_all, use_container_width=True)
 
 # =========================================================
