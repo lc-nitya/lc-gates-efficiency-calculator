@@ -984,7 +984,8 @@ elif page == "Infrastructure Costs":
     st.markdown("---")
 
     st.caption(
-        """Enter the per-study **infrastructure costs** (e.g., hardware, software, storage, API usage) for both the 
+        """
+        Enter the per-study **infrastructure costs** (e.g., hardware, software, storage, API usage) for both the 
         Business as Usual and Proposed Tool scenarios. These are non-personnel operational costs. While organizations 
         typically pay for subscriptions or services shared across multiple research projects, please provide your 
         best estimate for **per-study costs**. 
@@ -1312,15 +1313,15 @@ elif page == "Project-Stage Efficiency Gains":
     cost_summary = pd.concat([cost_summary, total_row], ignore_index=True)
 
     # --- Display tables ---
-    st.info(""" 
-            ### Duration (in weeks) by Project Stage ### 
+    st.markdown('### Duration (in weeks) by Project Stage ### ')
+    st.info("""
             - This table presents the total duration per project stage (in weeks), ignoring personnel allocation and active time spent.
             - The **Total** row provides the overall project-level duration. 
             """)
     st.dataframe(total_time_summary, use_container_width=True)
 
-    st.info(""" 
-            ### Active Person-Hours by Project Stage ###
+    st.markdown('### Active Person-Hours by Project Stage ### ')
+    st.info("""
             - This table presents the estimated total person-hours required for each stage of the research project across the **BAU** and **Proposed Tool** scenarios. 
             - **Time Saved** = hours saved by the Proposed Tool compared to BAU scenario (positive = less time required). 
             - All durations assume **40 working hours per week**. 
@@ -1329,8 +1330,8 @@ elif page == "Project-Stage Efficiency Gains":
 
     st.dataframe(time_summary, use_container_width=True)
 
-    st.info(""" 
-            ### Cost by Project Stage ###
+    st.markdown('### Cost by Project Stage ### ')
+    st.info("""
             - This table presents the estimated total personnel cost required for each stage of the research project as well as the non-personnel / infrastructure cost across the **BAU** and **Proposed Tool** scenarios. 
             - Personnel-cost is based on the % Active Time spent.
             - **Cost Saved** = hours saved by the Proposed Tool compared to BAU scenario (positive = less cost required). 
@@ -1419,8 +1420,8 @@ elif page == "Personnel Efficiency Gains":
     cost_summary = pd.concat([cost_summary, total_cost_row], ignore_index=True)
 
     # --- Display Person-Hours Table ---
+    st.markdown('### Active Person-Hours by Role ### ')
     st.info("""
-        ### Active Person-Hours by Role
         - Shows total active hours per role across **BAU** and **Proposed Tool** scenarios.
         - **Time Saved** = hours saved by Proposed Tool compared to BAU (positive = less time required).
         - All durations assume 40 working hours per week.
@@ -1429,8 +1430,8 @@ elif page == "Personnel Efficiency Gains":
     st.dataframe(time_summary, use_container_width=True)
 
     # --- Display Cost Table ---
+    st.markdown('### Personnel Cost by Role ### ')
     st.info("""
-        ### Personnel Cost by Role
         - Shows total personnel cost per role across **BAU** and **Proposed Tool** scenarios.
         - Personnel cost is based on the % Active Time spent.
         - Cost Saved = hours saved by the Proposed Tool compared to BAU (positive = less cost required).
