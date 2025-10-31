@@ -471,15 +471,12 @@ def get_scenario_value(scenario, col):
         return 0
 
 
-# --- Main Page ---
+page = st.session_state.current_page
+
 st.markdown(
-    "<h2 style='text-align: center;'>Efficiency Gains Calculator and Social ROI Dashboard</h2>",
+    "<h1 style='text-align: center; color: #E8886E;'>Efficiency Gains and Social ROI Dashboard</h1>",
     unsafe_allow_html=True
 )
-# Load logo
-# logo = Image.open("lc_icon.png")
-
-page = st.session_state.current_page
 
 # =========================================================
 # =========================================================
@@ -508,14 +505,15 @@ if page == "Getting Started":
             """)
 
     st.markdown("""
-            ### Feedback ###
-            - We'd love to hear your thoughts on using this tool by filling out this form: https://forms.gle/wCamoRi1x8Y1Q1Sr7
-            - If you have any questions, please reach out to: info@learningcollider.org
+            ### About ###
+            This tool is developed and maintained by Learning Collider: https://learningcollider.org
             
-            This tool is developed and maintained by Learning Collider: https://learningcollider.org""")
+            - **Feedback:** We'd love to hear your thoughts on using this tool by filling out this form: https://forms.gle/wCamoRi1x8Y1Q1Sr7
+            - If you have any questions, please reach out to: info@learningcollider.org
+            """)
 
     st.markdown("---")
-    st.markdown("## 🧰   Example Use Cases")
+    st.markdown("## 🧰  Use Cases")
     st.markdown("---")
 
     st.markdown("""
@@ -577,7 +575,7 @@ if page == "Getting Started":
     - Consider all the key roles involved in implementing such a study, such as data engineers, data scientists, project managers, and research leads.
     - Also consider the key steps in conducting the research, including tasks like establishing data-sharing agreements, obtaining student consent, managing data storage and security, random sampling, conducting analysis, and writing and disseminating the final report.
     - Finally, think about which steps in the research process - and which roles involved - your proposed tool helps make more efficient, and how it does so. Consider the specific challenges your tool aims to solve, such as reducing manual effort, improving data accessibility, streamlining collaboration, or accelerating analysis and reporting.
-    - This tool guides you through the process by comparing how a research project operates today (**Business as Usual** Scenario) versus how it would function with the tool in place (**Proposed Tool** Scenario).""")
+    - This tool guides you through the process by comparing how a research project operates today (**Business as Usual**) versus how it would function with the tool in place (**Proposed Tool**).""")
 
     st.subheader("How to use")
     st.markdown("""
@@ -595,7 +593,7 @@ if page == "Getting Started":
         If a stage doesn't apply, you can leave it blank.
         - **Proposed Tool**: Consider how the research project would run **with** the proposed tool. 
         For each stage of the project, describe the steps involved and estimate the total time and personnel effort required. 
-        If a stage doesn't apply, you can leave it blank. To simplify, you can **copy estimates from the Business as Usual scenario** and make edits only for the stages where the proposed tool is expected to change time or personnel effort.
+        If a stage doesn't apply, you can leave it blank. To simplify, you can **copy estimates from Business as Usual** and make edits only for the stages where the proposed tool is expected to change time or personnel effort.
     4. **View Outputs**
         - **Project-Stage Efficiency Gains**: Time and cost savings for a single research project using the Proposed Tool
         in comparison to Business as Usual, broken down by research project stage.
@@ -688,7 +686,7 @@ elif page == "Personnel Costs":
 # =========================================================
 elif page == "Business as Usual":
     st.markdown("---")
-    st.header("📊 Project Activities: *Business as Usual Scenario*")
+    st.header("📊 Project Activities: *Business as Usual*")
     st.markdown("---")
     st.info(
         """
