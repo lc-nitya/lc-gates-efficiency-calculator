@@ -3,17 +3,18 @@ import pandas as pd
 import uuid
 import math
 import plotly.express as px
+from PIL import Image
 
 # --- Page configuration ---
 st.set_page_config(
     page_title="Efficiency Gains Calculator and Social ROI Dashboard",
     layout="wide",
-    initial_sidebar_state="expanded"  # Keep sidebar open
+    initial_sidebar_state="expanded"
 )
 
 # --- Define pages and hierarchy ---
 PAGE_GROUPS = {
-    "Instructions": [],
+    "Getting Started": [],
     "Inputs": {
         "Personnel Costs": [],
         "Infrastructure Costs": [],
@@ -29,7 +30,7 @@ PAGE_GROUPS = {
 
 # Flatten pages for sequential navigation
 PAGES = [
-    "Instructions",
+    "Getting Started",
     "Personnel Costs",
     "Infrastructure Costs",
     "Social ROI Parameters",
@@ -42,13 +43,13 @@ PAGES = [
 
 # --- Initialize session state ---
 if "current_page" not in st.session_state:
-    st.session_state.current_page = "Instructions"
+    st.session_state.current_page = "Getting Started"
 
 # --- Sidebar Navigation ---
 st.sidebar.title("Navigation")
 
-if st.sidebar.button("Instructions", use_container_width=True):
-    st.session_state.current_page = "Instructions"
+if st.sidebar.button("Getting Started", use_container_width=True):
+    st.session_state.current_page = "Getting Started"
 
 st.sidebar.markdown("### 🧩 Inputs")
 for page_name, subpages in PAGE_GROUPS["Inputs"].items():
@@ -56,7 +57,7 @@ for page_name, subpages in PAGE_GROUPS["Inputs"].items():
     if page_name == "Project Activities":
         st.sidebar.markdown(f"**{page_name}**")
         for sub in subpages:
-            if st.sidebar.button(f" {sub}", use_container_width=True):
+            if st.sidebar.button(f"{sub}", use_container_width=True):
                 st.session_state.current_page = sub
     else:
         if st.sidebar.button(f"{page_name}", use_container_width=True):
@@ -84,25 +85,6 @@ def go_back():
 def go_first():
     st.session_state.current_page = PAGES[0]
 
-
-# --- CSS for fixed nav buttons ---
-st.markdown("""
-<style>
-.nav-buttons {
-    position: fixed;
-    bottom: 20px;
-    left: 0;
-    right: 0;
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 10px 20px;
-    border-top: 1px solid #ddd;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 9999;
-}
-</style>
-""", unsafe_allow_html=True)
 
 # --- Initialize session state for storing activity data ---
 if "project_steps" not in st.session_state:
@@ -277,8 +259,10 @@ def render_activity_section(section_name):
             rows = st.session_state.project_steps[section_name][stage]
 
             for idx, row in enumerate(rows.copy()):
-                st.markdown(f"<span style='color:#DF7861; font-weight:bold;'>**Step {idx + 1}**</span>",
-                            unsafe_allow_html=True)
+                st.markdown(
+                    f"<span style='color:#FB754B; font-weight:bold;'>Step {idx + 1}</span>",
+                    unsafe_allow_html=True
+                )
 
                 # Step Description and Notes
                 cols1 = st.columns([4, 4])
@@ -299,8 +283,10 @@ def render_activity_section(section_name):
                 )
 
                 # Active time per role
-                st.markdown(f"<span style='color:#ECB390;'>*% Active Time Spent per Role*</span>",
-                            unsafe_allow_html=True)
+                st.markdown(
+                    "<span style='color:#E8886E; font-style:italic;'>% Active Time Spent per Role</span>",
+                    unsafe_allow_html=True
+                )
                 time_data = {}
                 roles_per_row = 5
                 for i in range(0, len(personnel_roles), roles_per_row):
@@ -486,7 +472,13 @@ def get_scenario_value(scenario, col):
 
 
 # --- Main Page ---
-st.title("Efficiency Gains Calculator and Social ROI Dashboard")
+st.markdown(
+    "<h2 style='text-align: center;'>Efficiency Gains Calculator and Social ROI Dashboard</h2>",
+    unsafe_allow_html=True
+)
+# Load logo
+# logo = Image.open("lc_icon.png")
+
 page = st.session_state.current_page
 
 # =========================================================
@@ -496,9 +488,9 @@ page = st.session_state.current_page
 # =========================================================
 
 # =========================================================
-#  INSTRUCTIONS PAGE
+#  Getting Started PAGE
 # =========================================================
-if page == "Instructions":
+if page == "Getting Started":
     st.info(""" 
             ### What is the purpose of this tool? ###
             This tool was originally developed to help the Gates Foundation benchmark efficiency gains from its research and development (R&D) infrastructure investment portfolio. These investments aimed to make education research faster, more cost-effective and more scalable. 
@@ -514,6 +506,13 @@ if page == "Instructions":
             
             We believe this tool can be useful for many kinds of organizations — philanthropies, investors, and tech organizations (both for-profit and nonprofit) — helping them better understand, amplify, and communicate the impact of their work.
             """)
+
+    st.markdown("""
+            ### Feedback ###
+            - We'd love to hear your thoughts on using this tool by filling out this form: https://forms.gle/wCamoRi1x8Y1Q1Sr7
+            - If you have any questions, please reach out to: info@learningcollider.org
+            
+            This tool is developed and maintained by Learning Collider: https://learningcollider.org""")
 
     st.markdown("---")
     st.markdown("## 🧰   Example Use Cases")
@@ -580,9 +579,10 @@ if page == "Instructions":
     - Finally, think about which steps in the research process - and which roles involved - your proposed tool helps make more efficient, and how it does so. Consider the specific challenges your tool aims to solve, such as reducing manual effort, improving data accessibility, streamlining collaboration, or accelerating analysis and reporting.
     - This tool guides you through the process by comparing how a research project operates today (**Business as Usual** Scenario) versus how it would function with the tool in place (**Proposed Tool** Scenario).""")
 
-    st.subheader("Steps")
+    st.subheader("How to use")
     st.markdown("""
-    1. **Use the Sidebar** to navigate between pages.  
+    1. Use the **Sidebar** to navigate between pages. You can also use the **Next** and **Back** buttons at the bottom 
+    of each page for step-wise navigation.
     2. **Enter the Input Data**
         - **Personnel Costs**: Specify the roles/personnel and salaries involved in conducting the research project
         - **Infrastructure Costs**: Specify the non-personnel cost (e.g. hardware, software, storage, API usage) required 
@@ -597,13 +597,13 @@ if page == "Instructions":
         For each stage of the project, describe the steps involved and estimate the total time and personnel effort required. 
         If a stage doesn't apply, you can leave it blank. To simplify, you can **copy estimates from the Business as Usual scenario** and make edits only for the stages where the proposed tool is expected to change time or personnel effort.
     4. **View Outputs**
-        - **Project-Stage Efficiency Gains**: Time and cost savings for a single research project using the proposed tool, 
-        broken down by research project stage. These values are automatically calculated based on input data.
-        - **Personnel Efficiency Gains**:  Time and cost savings for a single research project using the proposed tool, 
-        broken down by personnel/roles involved. These values are automatically calculated based on input data.
-        - **Social ROI**: Return on investment for grantee organizations, scaled by the estimated number of 
-        organizations supported in the Business as Usual vs. Proposed Tool scenarios.
-    5. Use **Next** and **Back** buttons for step-wise navigation.
+        - **Project-Stage Efficiency Gains**: Time and cost savings for a single research project using the Proposed Tool
+        in comparison to Business as Usual, broken down by research project stage.
+        - **Personnel Efficiency Gains**:  Time and cost savings for a single research project using the Proposed Tool
+        in comparison to Business as Usual, broken down by personnel/roles involved.
+        - **Social ROI**: Return on investment for the Proposed Tool compared to Business as Usual, scaled by the estimated number of research projects completed with the tool and the number of years in operation.
+         
+        Outputs are automatically calculated based on input data and parameters.
     """)
 
 # =========================================================
@@ -613,6 +613,12 @@ elif page == "Personnel Costs":
     st.markdown("---")
     st.header("💼 Personnel Costs")
     st.markdown("---")
+
+    st.info("""
+    Specify the project personnel / roles and corresponding hourly salaries for those involved in the 
+    research project. 
+    
+    **Note:** Default roles are provided as a guiding framework and can be customized as needed.""")
 
     # Ensure session state exists and all rows have required keys
     if "personnel_rows" not in st.session_state:
@@ -637,20 +643,27 @@ elif page == "Personnel Costs":
         row.setdefault("Hourly Rate", 0.0)
         row.setdefault("Notes", "")
 
-        st.markdown(f"<span style='color:#DF7861'>***Personnel {idx + 1}***</span>", unsafe_allow_html=True)
+        cols = st.columns([0.25, 4, 3, 7, 1])  # Narrow column for trash icon
 
-        cols = st.columns([4, 3, 7, 1])  # Narrow column for trash icon
+        cols[0].markdown(
+            f"""
+            <span style="color:#FB754B; font-weight:bold; font-style: italic;">
+                {idx + 1}
+            </span>
+            """,
+            unsafe_allow_html=True
+        )
 
         # Editable inputs
-        role = cols[0].text_input("Role", row["Role"], key=f"role_{row['id']}")
-        rate = cols[1].number_input("Hourly Rate ($)", min_value=0.0,
+        role = cols[1].text_input("Role", row["Role"], key=f"role_{row['id']}")
+        rate = cols[2].number_input("Hourly Rate ($)", min_value=0.0,
                                     value=row["Hourly Rate"],
                                     step=1.0,
                                     key=f"rate_{row['id']}")
-        notes = cols[2].text_input("Notes", row["Notes"], key=f"notes_{row['id']}")
+        notes = cols[3].text_input("Notes", row["Notes"], key=f"notes_{row['id']}")
 
         # Delete button
-        if cols[3].button("❌", key=f"del_{row['id']}"):
+        if cols[4].button("❌", key=f"del_{row['id']}"):
             st.session_state.personnel_rows = [r for r in rows if r["id"] != row["id"]]
             st.rerun()
 
@@ -677,17 +690,27 @@ elif page == "Business as Usual":
     st.markdown("---")
     st.header("📊 Project Activities: *Business as Usual Scenario*")
     st.markdown("---")
-    st.caption(
-        "Overall project stage titles are not editable to serve as consistent framework across projects."
-        "The steps listed under each project stage are intended as a guiding framework to help you complete this "
-        "section. You may edit, add, or delete the steps under each project stage so that they align with the types "
-        "of projects your tool supports. "
-        "Please note: deleting a step means it is not required to complete the research project. Even if your "
-        "proposed tool does not target a particular step, the step must be included if it is relevant to conducting "
-        "the research project. "
-        "You may include any additional notes related to the execution of each project step. This is particularly "
-        "useful in the ***Proposed Tool*** scenario to explain why a step shows a significant difference in total "
-        "time or personnel effort compared to ***Business as Usual***. "
+    st.info(
+        """
+        This section aims to capture how a research project is conducted under ***Business as Usual***, serving as a 
+        baseline for comparing the efficiency gains achieved with the Proposed Tool. 
+        
+        The project stage headers are not editable, in order to ensure a consistent framework for conducting a 
+        research project. You should, however, update the steps under each header to accurately describe the research 
+        process in the ***Business as Usual*** scenario. 
+        
+        **Note:** 
+        - The default steps are intended as a guiding framework to help you complete this section. Please edit, add, 
+        or delete steps under each project stage so that they align with the types of research projects your tool 
+        supports. 
+        - You may include any additional notes related to the execution of each project step. This is particularly 
+        useful to explain significant differences in total time or personnel effort between ***Business as Usual*** 
+        and ***Proposed Tool*** scenarios.
+        - Deleting a step indicates that it is not required to complete the research project. If a step is 
+        relevant to conducting the research, it should be included—even if the Proposed Tool does not affect 
+        it—unless you specifically want to calculate time or cost savings for particular steps rather than the entire 
+        project. Excluding relevant steps may also distort Social ROI calculations, which are based on the total 
+        number of research projects completed within a given time period. """
     )
     render_activity_section("BAU")
 
@@ -695,25 +718,36 @@ elif page == "Proposed Tool":
     st.markdown("---")
     st.header("📊 Project Activities: *Proposed Tool*")
     st.markdown("---")
-    st.caption(
-        "Overall project stage titles are not editable to serve as consistent framework across projects."
-        "The steps listed under each project stage are intended as a guiding framework to help you complete this "
-        "section. You may edit, add, or delete the steps under each project stage so that they align with the types "
-        "of projects your tool supports. "
-        "Please note: deleting a step means it is not required to complete the research project. Even if your "
-        "proposed tool does not target a particular step, the step must be included if it is relevant to conducting "
-        "the research project. "
-        "You may include any additional notes related to the execution of each project step. This is particularly "
-        "useful in the ***Proposed Tool*** scenario to explain why a step shows a significant difference in total "
-        "time or personnel effort compared to ***Business as Usual***. "
+    st.info(
+        """
+        This section aims to capture how a research project is conducted under the ***Proposed Tool***, so that efficiency 
+        gains can be compared against Business as Usual. 
+
+        The project stage headers are not editable, in order to ensure a consistent framework for conducting a 
+        research project. You should, however, update the steps under each header to accurately describe the research 
+        process in the ***Proposed Tool*** scenario. 
+
+        **Note:** 
+        - The default steps are intended as a guiding framework to help you complete this section. Please edit, add, 
+        or delete steps under each project stage so that they align with the types of research projects your tool 
+        supports. 
+        - You may include any additional notes related to the execution of each project step. This is particularly 
+        useful to explain significant differences in total time or personnel effort between ***Business as Usual*** 
+        and ***Proposed Tool*** scenarios.
+        - Deleting a step indicates that it is not required to complete the research project. If a step is 
+        relevant to conducting the research, it should be included—even if the Proposed Tool does not affect 
+        it—unless you specifically want to calculate time or cost savings for particular steps rather than the entire 
+        project. Excluding relevant steps may also distort Social ROI calculations, which are based on the total 
+        number of research projects completed within a given time period. """
     )
 
     # --- Collapsible section using expander ---
     st.markdown("<br>", unsafe_allow_html=True)
     with st.expander("📋 Pre-Fill estimates from Business as Usual"):
         st.markdown(
-            "Save time by copying all estimates from the Business as Usual scenario. You can then adjust estimates "
-            "where the proposed tool changes things.")
+            """
+            Save time by copying all estimates from the Business as Usual scenario. You can then adjust estimates 
+            where the proposed tool changes things.""")
         st.warning(
             "⚠️Any edits you've made on this page will be overwritten if you select 'Yes'"
         )
@@ -739,9 +773,25 @@ elif page == "Social ROI Parameters":
     st.markdown("---")
     st.header("📈 Social ROI Parameters")
     st.markdown("---")
-
     # --- Median Impact on Learning Outcomes ---
-    st.markdown("<h3 style='color:#ECB390;'>Estimated Impact of Research Project</h3>", unsafe_allow_html=True)
+    st.markdown("<h3>Estimated Impact of Research Project</h3>", unsafe_allow_html=True)
+
+    st.info("""
+    **💡 Guidance on Estimating Impact and Long-Term Earnings**
+    
+    Here's an overview of how the default values were determined in this section:
+    - Median effects of education interventions in math range from 0.04 to 0.09 standard deviations (SD), with an overall median of 
+    0.12 SD (Kraft, 2019).
+    - A 0.5 SD improvement in middle school math scores is associated with a 3.5% increase in adult earnings at age 30 
+    (approximately \$1,200 per year in 2018; Urban Institute, 2024).
+    - Applying this as a linear relationship, a 0.12 SD gain—the median impact observed in typical ed-tech 
+    interventions (Kraft, 2019)—translates to an estimated \$288 increase in annual earnings per student at age 30. 
+    These effects appear similar across racial and ethnic groups. 
+    - *Optional:* As this estimate is based on the year 2018, you can adjust for inflation using this link: https://www.bls.gov/data/inflation_calculator.htm
+    
+    If you have research or evidence that more closely aligns with the interventions or studies supported by your tool, 
+    you may adjust the median impact and the associated long-term earnings accordingly.
+    Otherwise, use the default values, which are applicable to general education interventions.""")
 
     # --- Primary Outcome ---
     col1, col2 = st.columns([3, 2])
@@ -749,7 +799,8 @@ elif page == "Social ROI Parameters":
         learning_definition = st.text_input(
             "Primary outcome used to evaluate research project impact",
             value="Standardized math scores in middle school",
-            help="Specify the outcome that a research project supported by the proposed tool is evaluated on to measure effectiveness or success."
+            help="Specify the outcome that a research project supported by the proposed tool is evaluated on to "
+                 "measure effectiveness or success. "
         )
     with col2:
         learning_sd = st.number_input(
@@ -759,24 +810,19 @@ elif page == "Social ROI Parameters":
             step=0.01,
             format="%.2f",
             key="roi_learning_sd",
-            help='Specify estimated median impact in standard deviations. See info below for typical ranges.'
+            help='Specify estimated median impact in standard deviations.'
         )
 
-    st.caption("""
-    **Note on Typical Impact / Effect Sizes:**  
-    Median impacts in math range from 0.04 to 0.09 SD, with a median of 0.12 SD (Kraft, 2019).  
-    This number is only a reference point. You can adjust the impact size per the actual results of your research studies.
-    """)
-
-    # Add spacing
-    st.write("")
+    # st.caption("""**Note on Typical Impact / Effect Sizes:** Median effects in math range from 0.04 to 0.09 SD,
+    # with an overall median of 0.12 SD (Kraft, 2019). This value is provided as a reference and may be adjusted
+    # according to effect sizes observed in research studies similar to those supported by the proposed tool.""")
 
     # --- Economic Opportunity Coefficient ---
     col1, col2 = st.columns([3, 2])
     with col1:
         econ_definition = st.text_input(
-            "Long-term economic opportunity outcome",
-            help="Specify the long-term economic outcome that the primary outcome influences",
+            "Long-term Earnings Impact",
+            help="Specify the long-term earnings impact that the primary outcome influences",
             value="Income at age 30"
         )
     with col2:
@@ -786,29 +832,28 @@ elif page == "Social ROI Parameters":
             value=2400.0,
             step=0.1,
             format="%.2f",
-            help="Enter the expected average increase in the long-term economic opportunity outcome for a 1 standard "
+            help="Enter the expected average increase in the long-term earnings impact for a 1 standard "
                  "deviation improvement in the primary outcome",
             key="roi_econ_per_sd"
         )
 
-    # Add spacing after
-    st.write("")
+    # st.caption("""**Note on Long-term Earnings Impact:** A 0.5 standard deviation (SD) improvement in middle school
+    # math scores is associated with a 3.5% increase in adult earnings (approximately \$1,200 per year in 2018; Urban
+    # Institute, 2024). Applying this relationship, a 0.12 SD gain—the median impact observed in education
+    # interventions (Kraft, 2019)—translates to an estimated \$288 increase in annual earnings per student by age 30.
+    # These effects appear consistent across racial and ethnic groups. You can adjust the above number for inflation
+    # using this link: https://www.bls.gov/data/inflation_calculator.htm """)
 
     # --- Per-Student Outcome Improvement (Computed) ---
     computed_improvement = learning_sd * econ_per_sd
     st.number_input("Per-student improvement in long-term economic opportunity (in $)", value=computed_improvement,
                     disabled=True)
 
-    st.caption("""
-    **Note on Long-term Economic Opportunity (or Earnings Impact):**  
-    A 0.5 SD gain in math scores during middle school increases adult earnings by 3.5% (approx. \$1,200 per year in 2018, Urban Institute, 2024).
-    A 0.12 SD gain (i.e. median impact) translates to \$288 per year in additional earnings per student at age 30.
-    These effects are similar across race and ethnicity. 
-    
-    You can adjust the above number for inflation using this link: https://www.bls.gov/data/inflation_calculator.htm """)
-
     # --- Evidence Generation ---
-    st.markdown("<h3 style='color:#ECB390;'>Discovery Rate</h3>", unsafe_allow_html=True)
+    st.markdown("<h3>Discovery Rate</h3>", unsafe_allow_html=True)
+    st.info("""💡According to the Good Science Project we only have about a **10% success rate** in identifying effective interventions. 
+    You may adjust this value to better reflect the interventions or studies that your tool supports.""")
+
     discovery_rate = st.number_input(
         "Rate of discovery of impact (%)",
         min_value=0.0,
@@ -820,13 +865,9 @@ elif page == "Social ROI Parameters":
         help="The estimated probability that a research project will detect measurable impact in the primary outcome"
     )
 
-    st.caption(
-        '**Note on Discovery Rate**: According to the Good Science Project we only have about a 10% success rate in '
-        'identifying effective interventions.')
-
     # --- Research Study Reach & Investment ---
-    st.markdown("<h3 style='color:#ECB390;'>Reach and Impact</h3>", unsafe_allow_html=True)
-    st.caption("You can explore different scenarios by adjusting the inputs based on your assumptions.")
+    st.markdown("<h3>Reach and Impact</h3>", unsafe_allow_html=True)
+    st.info("You can explore different scenarios by adjusting the inputs based on your assumptions.")
     col1, col2 = st.columns(2)
     with col1:
         total_students = st.number_input(
@@ -860,7 +901,7 @@ elif page == "Social ROI Parameters":
             help=(
                 """
                 Specify the number of organizations that can use the solution in the Business as Usual scenario.
-                Only relevant when the tool or infrastructure impacts more than one organization; otherwise, the default is 1.
+                Only relevant when the solution impacts or can be used by more than one organization; otherwise, the default is 1.
                 
                 The total number of concurrent projects depends on:
                 - The number of organizations using the solution (BAU or proposed tool).
@@ -878,7 +919,7 @@ elif page == "Social ROI Parameters":
             help=(
                 """
                 Specify the number of organizations that can use the solution in the Proposed Tool scenario.
-                Only relevant when the tool or infrastructure impacts more than one organization; otherwise, the default is 1.
+                Only relevant when the solution impacts or can be used by more than one organization; otherwise, the default is 1.
 
                 The total number of concurrent projects depends on:
                 - The number of organizations using the solution (BAU or proposed tool).
@@ -983,18 +1024,17 @@ elif page == "Infrastructure Costs":
     st.header("💻 Infrastructure Costs")
     st.markdown("---")
 
-    st.caption(
+    st.info(
         """
         Enter the per-study **infrastructure costs** (e.g., hardware, software, storage, API usage) for both the 
-        Business as Usual and Proposed Tool scenarios. These are non-personnel operational costs. While organizations 
-        typically pay for subscriptions or services shared across multiple research projects, please provide your 
-        best estimate for **per-study costs**. 
-        
-        The cost categories listed below serve as a guiding framework. You may edit, add, or delete categories,
+        Business as Usual and Proposed Tool scenarios. They represent the **total infrastructure cost** from the 
+        perspective of a single end user — i.e., an organization conducting a research project supported by the proposed tool. 
+        These are non-personnel operational costs. While organizations typically pay for subscriptions or services 
+        shared across multiple research projects, please provide your best estimate for **per-study costs**. 
+    
+        **Note**: The cost categories listed below serve as a guiding framework. You may edit, add, or delete categories,
         adjust amounts, and add notes as needed.
-        
-        The estimates represent the **total infrastructure cost** from the perspective of a single end user — i.e.,
-        an organization conducting research supported by the proposed tool. """
+        """
     )
 
     # --- Initialize with prefilled categories but no costs ---
@@ -1033,35 +1073,42 @@ elif page == "Infrastructure Costs":
     # --- Editable Cost Inputs ---
     rows = st.session_state.infrastructure_costs
     for idx, row in enumerate(rows):
-        st.markdown(f"<span style='color:#DF7861'>***Cost Item {idx + 1}***</span>", unsafe_allow_html=True)
+        cols = st.columns([0.25, 3, 2, 2, 4, 1])
+        cols[0].markdown(
+            f"""
+            <span style="color:#FB754B; font-weight:bold; font-style: italic;">
+                {idx + 1}
+            </span>
+            """,
+            unsafe_allow_html=True
+        )
 
-        cols = st.columns([3, 2, 2, 3, 1])
-        category = cols[0].text_input(
+        category = cols[1].text_input(
             "Cost Category",
             value=row["Cost Category"],
             key=f"cat_{row['id']}"
         )
-        BAU = cols[1].number_input(
+        BAU = cols[2].number_input(
             "Business as Usual ($)",
             min_value=0.0,
             step=10.0,
             value=float(row["Business as Usual ($)"]),
             key=f"bau_{row['id']}"
         )
-        proposed = cols[2].number_input(
+        proposed = cols[3].number_input(
             "Proposed Tool ($)",
             min_value=0.0,
             step=10.0,
             value=float(row["Proposed Tool ($)"]),
             key=f"tool_{row['id']}"
         )
-        notes = cols[3].text_input(
+        notes = cols[4].text_input(
             "Notes",
             value=row["Notes"],
             key=f"notes_{row['id']}"
         )
 
-        if cols[4].button("❌", key=f"del_cost_{row['id']}"):
+        if cols[5].button("❌", key=f"del_cost_{row['id']}"):
             st.session_state.infrastructure_costs = [r for r in rows if r["id"] != row["id"]]
             st.rerun()
 
@@ -1537,10 +1584,11 @@ elif page == "Social ROI":
         
         - **Variable Costs** 
             - These are recurring or scalable expenses that are incurred for each research study. 
-            - Examples include data storage, API or tool usage, researcher time, or other per-study fees. 
+            - Examples include operational infrastructure (e.g., data storage, API or tool usage), personnel time, 
+        or other per-study fees. 
             - This cost is **derived directly** from the operational cost of the research study. 
         
-        **Note: The operational cost of the research study is the total personnel and infrastructure costs computed 
+        **The operational cost of the research study is the total personnel and infrastructure costs computed 
         from your inputs**. """)
 
     col1, col2 = st.columns(2)
@@ -1550,11 +1598,13 @@ elif page == "Social ROI":
             value=0,
             help="""One-time setup cost for the BAU scenario."""
         )
-        st.caption("""This is initialized to $0, assuming that without the proposed tool, organizations repeat 
-        the setup for each new project (i.e., there are no one-time costs; all costs are per project). 
-        Depending on the typical BAU scenario for the organizations targeted by the proposed tool—such as whether 
-        they would build a custom tool, use an off-the-shelf solution, or repeat the setup for each project—please provide 
-        your best estimate of their initial setup cost. """)
+        st.caption("""
+        This is initialized to $0, assuming that without the proposed tool, organizations repeat the 
+        setup for each new project (i.e., there are no one-time costs; all costs are per project). 
+        
+        Consider how organizations using the Proposed Tool would normally operate under Business as Usual. For example, 
+        would they build a custom tool, use an off-the-shelf solution, or repeat the setup for each project? Based on 
+        this, provide your best estimate of their initial setup cost.""")
 
     with col2:
         fixed_tool_user = st.number_input(
@@ -1563,7 +1613,7 @@ elif page == "Social ROI":
             help="""Initial investment or one-time setup cost in the Proposed Tool scenario"""
         )
         st.caption("""This is initialized to the grantee organization's investment in building the proposed tool.
-        Adjusted as needed to reflect actual or projected costs.""")
+        Adjust as needed to reflect actual or projected cost of tool development.""")
 
     # === Charts: Impact per Dollar Over Time ===
     st.markdown('---')
